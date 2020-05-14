@@ -1,4 +1,4 @@
-# kristuff/abuse-ipdb
+# Kristuff\AbuseIPDB
 > A mini library to work with the AbuseIPDB api V2
 
 see [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the CLI version
@@ -13,13 +13,13 @@ Requirements
 Install
 -------
 
-1. Deploy with composer
+Deploy with composer:
 
 ```json
-[...]
+...
 "require": {
-        "kristuff/abuseipdb": ">=0.1-stable"
-    },
+    "kristuff/abuseipdb": ">=0.1-stable"
+},
 ```
 
 Usage
