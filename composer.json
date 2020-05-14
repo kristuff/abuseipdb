@@ -1,0 +1,20 @@
+{
+    "name": "kristuff/abuseipdb",
+    "description": "A library to work with the AbuseIPDB api V2",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristuff",
+            "homepage": "https://github.com/kristuff"
+        }
+    ],
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kristuff\\AbuseIPDB\\": "lib/"
+        }
+    }
+}
