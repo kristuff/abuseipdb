@@ -1,14 +1,14 @@
 # kristuff/abuse-ipdb
 > A mini library to work with the AbuseIPDB api V2
 
-see [kristuff/abuse-ipdb-cli](https://github.com/kristuff/abuse-ipdb-cli) for the CLI version
+see [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the CLI version
 
 
 Requirements
 ------------
 - PHP >= 7.1
 - PHP's cURL  
-- A valid account to [abuseipdb.com](https://abuseipdb.com) with an API key
+- A valid [abuseipdb.com](https://abuseipdb.com) account with an API key
 
 Install
 -------
