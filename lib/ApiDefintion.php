@@ -87,7 +87,7 @@ abstract class ApiDefintion
         'hack'            => ['15', 'Hacking', false],           
 
         // Attempts at SQL injection.
-        'sql'             => ['16', 'SQL Injection'], true,    
+        'sql'             => ['16', 'SQL Injection', true],     
         
         // Email sender spoofing.
         'spoof'           => ['17', 'Spoofing', true],         

@@ -79,7 +79,9 @@ class ApiManager extends ApiDefintion
         return array(
             'userId'  => $this->aipdbUserId,
             'apiKey'  => $this->aipdbApiKey,
-            'selfIps' => $this->selfIps,
+
+          // TODO  'selfIps' => $this->selfIps,
+          // TODO default report cat 
         );
     }
 
@@ -92,11 +94,14 @@ class ApiManager extends ApiDefintion
      * 
      * @return \Kristuff\AbuseIPDB\ApiManager
      */
-    public static function fromConfigstring(string $configPath)
+    public static function fromConfigFile(string $configPath)
     {
         //todo check file exist
         $config = self::loadJsonFile($configPath);
-        return new ApiManager($config->api_key, $config->user_id, $config->self_ips);
+
+        // TODO $config->self_ips
+        // TODO other options
+        return new ApiManager($config->api_key, $config->user_id);
     }
 
     /**

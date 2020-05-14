@@ -4,6 +4,8 @@
 see [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the CLI version
 
 
+***under construction, for now, just check part is implemented***
+
 Requirements
 ------------
 - PHP >= 7.1
