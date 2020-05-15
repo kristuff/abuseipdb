@@ -7,7 +7,7 @@
 [![License](https://poser.pugx.org/kristuff/abuseipdb/license)](https://packagist.org/packages/kristuff/abuseipdb)
 
 
-*see also [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the `CLI` version*
+***see also [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the `CLI` version***
 
 Features
 --------

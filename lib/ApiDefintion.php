@@ -122,12 +122,12 @@ abstract class ApiDefintion
     /**
      * Get the category id corresponding to given name
      * 
-     * @access protected
+     * @access public
      * @param string $categoryName    The report categoriy name
      * 
      * @return string|bool            The category id in string format if found, otherwise false
      */
-    protected function getCategoryIdbyName(string $categoryName)
+    public function getCategoryIdbyName(string $categoryName)
     {
         foreach ($this->aipdbApiCategories as $cat){
             if ($cat[0] === $categoryName) {
@@ -142,12 +142,12 @@ abstract class ApiDefintion
     /**
      * Get the category name corresponding to given id
      * 
-     * @access protected
+     * @access public
      * @param string    $categoryId   The report category id
      * 
      * @return string|bool            The category name if found, otherwise false
      */
-    protected function getCategoryNameById(string $categoryId)
+    public function getCategoryNameById(string $categoryId)
     {
         foreach ($this->aipdbApiCategories as $cat){
            if ($cat[1] === $categoryId) {
@@ -163,7 +163,7 @@ abstract class ApiDefintion
      * Get the index of category corresponding to given value
      * 
      * @access protected
-     * @param string    $value          The report category id
+     * @param string    $value          The report category id or name
      * @param string    $index          The index in value array 
      * 
      * @return int|bool                 The category index if found, otherwise false
