@@ -24,7 +24,7 @@ namespace Kristuff\AbuseIPDB;
  * Class ApiDefintion
  * 
  * Abstract base class for ApiManager
- * Contains main hard coded api settings 
+ * Contains main hard coded api settings
  */
 abstract class ApiDefintion
 {
@@ -41,83 +41,147 @@ abstract class ApiDefintion
     protected $aipdbApiCategories = [
         
         // Altering DNS records resulting in improper redirection.        
-        'dns-c'           => ['1', 'DNS Compromise', true],    
+        ['dns-c'           , '1', 'DNS Compromise', true],    
         
         // Falsifying domain server cache (cache poisoning).
-        'dns-p'           => ['2', 'DNS Poisoning', true],     
+        ['dns-p'           , '2', 'DNS Poisoning', true],     
         
         // Fraudulent orders.
-        'fraud-orders'    => ['3', 'Fraud Orders', true],      
+        ['fraud-orders'    , '3', 'Fraud Orders', true],      
 
         // Participating in distributed denial-of-service (usually part of botnet).        
-        'ddos'            => ['4', 'DDoS Attack', true],       
+        ['ddos'            , '4', 'DDoS Attack', true],       
         
         // 
-        'ftp-bf'          => ['5', 'FTP Brute-Force', true],   
+        ['ftp-bf'          , '5', 'FTP Brute-Force', true],   
         
         // Oversized IP packet.
-        'pingdeath'       => ['6', 'Ping of Death', true],     
+        ['pingdeath'       , '6', 'Ping of Death', true],     
 
         // Phishing websites and/or email.
-        'phishing'        => ['7', 'Phishing', true],          
+        ['phishing'        , '7', 'Phishing', true],          
         
         //
-        'fraudvoip'       => ['8', 'Fraud VoIP', true],        
+        ['fraudvoip'       , '8', 'Fraud VoIP', true],        
 
         // Open proxy, open relay, or Tor exit node.
-        'openproxy'       => ['9', 'Open Proxy', true],        
+        ['openproxy'       , '9', 'Open Proxy', true],        
 
          // Comment/forum spam, HTTP referer spam, or other CMS spam.
-        'webspam'         => ['10', 'Web Spam', true],        
+         ['webspam'         , '10', 'Web Spam', true],        
 
         // Spam email content, infected attachments, and phishing emails. Note: Limit comments to only relevent
         // information (instead of log dumps) and be sure to remove PII if you want to remain anonymous.
-        'emailspam'       => ['11', 'Email Spam', true],                                                   
+        ['emailspam'       , '11', 'Email Spam', true],                                                   
              
         // CMS blog comment spam.
-        'blogspam'        => ['12', 'Blog Spam', true],      
+        ['blogspam'        , '12', 'Blog Spam', true],      
         
         // Conjunctive category.
-        'vpnip'           => ['13', 'VPN IP', false], // to check alone ??           
+        ['vpnip'           , '13', 'VPN IP', false], // to check alone ??           
 
         // Scanning for open ports and vulnerable services.
-        'scan'            => ['14', 'Port Scan', true],        
+        ['scan'            , '14', 'Port Scan', true],        
        
         // seems to can't be used alone
-        'hack'            => ['15', 'Hacking', false],           
+        ['hack'            , '15', 'Hacking', false],           
 
         // Attempts at SQL injection.
-        'sql'             => ['16', 'SQL Injection', true],     
+        ['sql'             , '16', 'SQL Injection', true],     
         
         // Email sender spoofing.
-        'spoof'           => ['17', 'Spoofing', true],         
+        ['spoof'           , '17', 'Spoofing', true],         
 
         // Credential brute-force attacks on webpage logins and services like SSH, FTP, SIP, SMTP, RDP, etc. 
         // This category is seperate from DDoS attacks.
-        'brute'           => ['18', 'Brute-Force', true],     
+        ['brute'           , '18', 'Brute-Force', true],     
 
         // Webpage scraping (for email addresses, content, etc) and crawlers that do not honor robots.txt.                                  
         // Excessive requests and user agent spoofing can also be reported here.                        
-        'badbot'          => ['19', 'Bad Web Bot', true],      
+        ['badbot'          , '19', 'Bad Web Bot', true],      
                                                          
-        
         // Host is likely infected with malware and being used for other attacks or to host malicious content. 
         // The host owner may not be aware of the compromise. This category is often used in combination 
         // with other attack categories.
-        'explhost'        => ['20', 'Exploited Host', true],
+        ['explhost'        , '20', 'Exploited Host', true],
         
         // Attempts to probe for or exploit installed web applications such as a CMS 
         // like WordPress/Drupal, e-commerce solutions, forum software, phpMyAdmin and 
         // various other software plugins/solutions.                                                         
-        'webattack'       => ['21', 'Web App Attack', true ],   
+        ['webattack'       , '21', 'Web App Attack', true ],   
         
         // Secure Shell (SSH) abuse. Use this category in combination 
         // with more specific categories.
-        'ssh'             => ['22', 'SSH', false],              
+        ['ssh'             , '22', 'SSH', false],              
 
         // Abuse was targeted at an "Internet of Things" type device. Include 
         // information about what type of device was targeted in the comments.         
-        'oit'             => ['23', 'IoT Targeted', true],     
+        ['oit'             , '23', 'IoT Targeted', true],     
       ];
+
+    /**
+     * Get the category id corresponding to given name
+     * 
+     * @access protected
+     * @param string $categoryName    The report categoriy name
+     * 
+     * @return string|bool            The category id in string format if found, otherwise false
+     */
+    protected function getCategoryIdbyName(string $categoryName)
+    {
+        foreach ($this->aipdbApiCategories as $cat){
+            if ($cat[0] === $categoryName) {
+                return $cat;
+            }
+         }
+
+        // not found
+        return false;
+    }
+
+    /**
+     * Get the category name corresponding to given id
+     * 
+     * @access protected
+     * @param string    $categoryId   The report category id
+     * 
+     * @return string|bool            The category name if found, otherwise false
+     */
+    protected function getCategoryNameById(string $categoryId)
+    {
+        foreach ($this->aipdbApiCategories as $cat){
+           if ($cat[1] === $categoryId) {
+               return $cat;
+           }
+        }
+
+        // not found
+        return false;
+    }
+
+    /**
+     * Get the index of category corresponding to given value
+     * 
+     * @access protected
+     * @param string    $value          The report category id
+     * @param string    $index          The index in value array 
+     * 
+     * @return int|bool                 The category index if found, otherwise false
+     */
+    protected function getCategoryIndex(string $value, int $index)
+    {
+        $i = -1;
+        foreach ($this->aipdbApiCategories as $cat){
+            
+            $i++;
+
+            if ($cat[$index] === $value) {
+                return $i;
+            }
+         }
+
+        // not found
+        return false;
+    }
 
 }

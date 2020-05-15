@@ -80,8 +80,8 @@ class ApiManager extends ApiDefintion
             'userId'  => $this->aipdbUserId,
             'apiKey'  => $this->aipdbApiKey,
 
-          // TODO  'selfIps' => $this->selfIps,
-          // TODO default report cat 
+          // TODO 'selfIps' => $this->selfIps,
+          // TODO  default report cat 
         );
     }
 
@@ -93,14 +93,27 @@ class ApiManager extends ApiDefintion
      * @param string    $configPath     The configuration file path
      * 
      * @return \Kristuff\AbuseIPDB\ApiManager
+     * @throws \InvalidArgumentException                        If the given file does not exist
+     * @throws \Kristuff\AbuseIPDB\InvalidPermissionException   If the given file is not readable 
      */
     public static function fromConfigFile(string $configPath)
     {
+
+        // check file exists
+        if (!file_exists($configPath) || !is_file($configPath)){
+            throw new \InvalidArgumentException('The file [' . $configPath . '] does not exist.');
+        }
+
+        // check file is redable
+        if (!is_readable($configPath)){
+            throw new InvalidPermissionException('The file [' . $configPath . '] is not readable.');
+        }
+
         //todo check file exist
         $config = self::loadJsonFile($configPath);
 
-        // TODO $config->self_ips
-        // TODO other options
+        // TODO     $config->self_ips
+        // TODO     other options
         return new ApiManager($config->api_key, $config->user_id);
     }
 
@@ -128,13 +141,14 @@ class ApiManager extends ApiDefintion
      * 
      * @access public
      * @param string    $ip             The ip to report
-     * @param array     $categories     The report categories
+     * @param string    $categories     The report categories
      * @param string    $message        The report message
+     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
      *
-     * @return stdClass|array
+     * @return object|array
      * @throws \InvalidArgumentException
      */
-    public function report(string $ip = '', array $categories = [], $message = '')
+    public function report(string $ip = '', string $categories = '', string $message = '', bool $returnArray = false)
     {
          // ip must be set
         if (empty($ip)){
@@ -151,60 +165,98 @@ class ApiManager extends ApiDefintion
             throw new \InvalidArgumentException('report message was empty');
         }
 
-        // TODO valider les cat / seules pas seules...
         // TODO clean message ? selfips list 
         $cats = $this->validateCategories($categories);
 
         // report AbuseIPDB request
-        
-        
-        //TODO
-        return $this->apiRequest('report', 'POST', [
+        return $this->apiRequest('report', [
             'ip' => $ip,
-            'categories' =>   'TODO', '21,15',
+            'categories' => $cats,
             'comment' => $message
-        ]);
+            ],
+            'POST', $returnArray
+        );
     }
 
     /**
      * Check if the category(ies) given is/are valid
      * Check for shortname or id, and categories that can't be used alone 
      * 
-     * @access public
+     * @access protected
      * @param array $categories       The report categories list
      *
      * @return string               Formatted string id list ('18,2,3...')
      * @throws \InvalidArgumentException
      */
-    public function validateCategories(array $categories = [])
+    protected function validateCategories(string $categories)
     {
-        $newList = [];
-        $needAnother = false;
+        // the return categories string
+        $catsString = ''; 
 
-        foreach ($categories as $cat){
+        // used when cat that can't be used alone
+        $needAnother = null;
 
+        // parse given categories
+        $cats = explode(',', $categories);
+
+        foreach ($cats as $cat) {
+
+            // get index on our array of categories
+            $catIndex    = is_numeric($cat) ? $this->getCategoryIndex($cat, 1) : $this->getCategoryIndex($cat, 0);
+
+            // check if found
+            if ($catIndex === false ){
+                throw new \InvalidArgumentException('Invalid report category was given : ['. $cat .  ']');
+            }
+
+            // get Id
+            $catId = $this->aipdbApiCategories[$catIndex][1];
+
+            // need another ?
+            if ($needAnother !== false){
+
+                // is a standalone cat ?
+                if ($this->aipdbApiCategories[$catIndex][3] === false) {
+                    $needAnother = true;
+
+                } else {
+                    // ok, continue with other at least one given
+                    // no need to reperform this check
+                    $needAnother = false;
+                }
+            }
+
+            // set or add to cats list 
+            $catsString = ($catsString === '') ? $catId : $catsString .','.$catId;
         }
-        //todo
 
+        if ($needAnother !== false){
+            throw new \InvalidArgumentException('Invalid report category paremeter given: some categories can\'t be used alone');
+        }
+
+        // if here that ok
+        return $catsString;
     }
 
     /**
      * Perform a 'check' api request
      * 
-     * 
-     *  TODO        OPTION POUR VERBOSE ;;;
-     *              force $maxAge int as parameter ?
-     * 
      * @access public
-     * @param string $ip        The ip to check
-     * @param string $maxAge    Max age in days
-     *
-     * @return stdObj
-     * @throws \InvalidArgumentException
+     * @param string    $ip             The ip to check
+     * @param string    $maxAge         Max age in days
+     * @param bool      [$verbose]      True to get the full response. Default is false
+     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
+     *                                      greater than 365, or when ip value was not set. 
      */
-    public function check(string $ip = null, string $maxAge = '30')
+    public function check(string $ip = null, string $maxAge = '30', bool $verbose = false, bool $returnArray = false)
     {
         
+        if (!is_numeric($maxAge)){
+            throw new \InvalidArgumentException('maxAge must be a numeric value (' . $maxAge . ' was given)');
+        }
         $maxAge = intval($maxAge);
 
         // max age must less or equal to 365
@@ -217,25 +269,33 @@ class ApiManager extends ApiDefintion
             throw new \InvalidArgumentException('ip argument must be set (null given)');
         }
 
+        // minimal data
+        $data = [
+            'ipAddress'     => $ip, 
+            'maxAgeInDays'  => $maxAge,  
+        ];
+
+        // option
+        if ($verbose){
+           $data['verbose'] = true;
+        }
+
         // check AbuseIPDB request
-        return $this->apiRequest('check', 'GET', [
-             'ipAddress' => $ip, 
-             'maxAgeInDays' => $maxAge,  
-             'verbose' => true 
-        ]);
+        return $this->apiRequest('check', $data, 'GET', $returnArray) ;
     }
 
     /**
-     * Perform a cURL request       TODO: option as array
+     * Perform a cURL request       
      * 
      * @access protected
-     * @param string    $path      The api end path 
-     * @param string    $method    The request method. Default is 'GET' 
-     * @param array     $data      The request data 
+     * @param string    $path           The api end path 
+     * @param array     $data           The request data 
+     * @param string   [$method]        The request method. Default is 'GET' 
+     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
      * 
-     * @return stdObj TODO object ARRAY ;;;
+     * @return object|array
      */
-    protected function apiRequest(string $path, string $method = 'GET', array $data) 
+    protected function apiRequest(string $path, array $data, string $method = 'GET', bool $returnArray = false) 
     {
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
@@ -267,8 +327,8 @@ class ApiManager extends ApiDefintion
       // close connection
       curl_close($ch);
   
-      // return response as json object
-      return json_decode($result);
+      // return response as object / array
+      return json_decode($result, $returnArray);
     }
 
     /** 

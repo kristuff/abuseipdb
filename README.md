@@ -1,13 +1,23 @@
 # Kristuff\AbuseIPDB
 > A mini library to work with the AbuseIPDB api V2
 
-see [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the CLI version
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kristuff/abuseipdb/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kristuff/abuseipdb/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/kristuff/abuseipdb/badges/build.png?b=master)](https://scrutinizer-ci.com/g/kristuff/abuseipdb/build-status/master)
+[![Latest Stable Version](https://poser.pugx.org/kristuff/abuseipdb/v/stable)](https://packagist.org/packages/kristuff/abuseipdb)
+[![License](https://poser.pugx.org/kristuff/abuseipdb/license)](https://packagist.org/packages/kristuff/abuseipdb)
 
 
-***under construction, for now, just check part is implemented***
+*see also [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the `CLI` version*
+
+Features
+--------
+- **✓** Single check request
+- **✓** Single report request
+- *\[TODO\]* Check block request  
+- *\[TODO\]* Bulk report request
 
 Requirements
-------------
+------------    
 - PHP >= 7.1
 - PHP's cURL  
 - A valid [abuseipdb.com](https://abuseipdb.com) account with an API key
@@ -28,6 +38,8 @@ Usage
 -----
 
 ```php
+<?php
+
 echo ('TODO');
 ```
 
