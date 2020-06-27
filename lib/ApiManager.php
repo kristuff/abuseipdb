@@ -58,7 +58,7 @@ class ApiManager extends ApiDefintion
      * @access public
      * @param string  $apiKey     The AbuseIPDB api key
      * @param string  $userId     The AbuseIPDB user's id
-     * @param array   $myIps      The Ips you dont want to report
+     * @param array   $myIps      The Ips/domain name you dont want to display in report messages
      * 
      */
     public function __construct(string $apiKey, string $userId, array $myIps = [])
@@ -79,9 +79,9 @@ class ApiManager extends ApiDefintion
         return array(
             'userId'  => $this->aipdbUserId,
             'apiKey'  => $this->aipdbApiKey,
-
-          // TODO 'selfIps' => $this->selfIps,
-          // TODO  default report cat 
+            'selfIps' => $this->selfIps,
+            
+            // TODO  default report cat 
         );
     }
 
@@ -104,17 +104,24 @@ class ApiManager extends ApiDefintion
             throw new \InvalidArgumentException('The file [' . $configPath . '] does not exist.');
         }
 
-        // check file is redable
+        // check file is readable
         if (!is_readable($configPath)){
             throw new InvalidPermissionException('The file [' . $configPath . '] is not readable.');
         }
 
-        //todo check file exist
-        $config = self::loadJsonFile($configPath);
+        // todo check file exist
+        $keyConfig = self::loadJsonFile($configPath);
+        $selfIps = [];
+        
+        // Look for other optional config files in the same directory 
+        $selfIpsConfigPath = pathinfo($configPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . 'self_ips.json';
+        if (file_exists($selfIpsConfigPath)){
+            $selfIps = self::loadJsonFile($selfIpsConfigPath)->self_ips;
+        }
 
-        // TODO     $config->self_ips
-        // TODO     other options
-        return new ApiManager($config->api_key, $config->user_id);
+        $app = new ApiManager($keyConfig->api_key, $keyConfig->user_id, $selfIps);
+        
+        return $app;
     }
 
     /**
@@ -143,7 +150,7 @@ class ApiManager extends ApiDefintion
      * @param string    $ip             The ip to report
      * @param string    $categories     The report categories
      * @param string    $message        The report message
-     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
      *
      * @return object|array
      * @throws \InvalidArgumentException
@@ -165,14 +172,15 @@ class ApiManager extends ApiDefintion
             throw new \InvalidArgumentException('report message was empty');
         }
 
-        // TODO clean message ? selfips list 
+        // validates categories, clean message 
         $cats = $this->validateCategories($categories);
+        $msg = $this->cleanMessage($message);
 
         // report AbuseIPDB request
         return $this->apiRequest('report', [
             'ip' => $ip,
             'categories' => $cats,
-            'comment' => $message
+            'comment' => $msg
             ],
             'POST', $returnArray
         );
@@ -244,8 +252,8 @@ class ApiManager extends ApiDefintion
      * @access public
      * @param string    $ip             The ip to check
      * @param string    $maxAge         Max age in days
-     * @param bool      [$verbose]      True to get the full response. Default is false
-     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $verbose        True to get the full response. Default is false
+     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
      * 
      * @return object|array
      * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
@@ -290,13 +298,15 @@ class ApiManager extends ApiDefintion
      * @access protected
      * @param string    $path           The api end path 
      * @param array     $data           The request data 
-     * @param string   [$method]        The request method. Default is 'GET' 
-     * @param bool     [$returnArray]   True to return an indexed array instead of an object. Default is false. 
+     * @param string    $method         The request method. Default is 'GET' 
+     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
      * 
      * @return object|array
      */
     protected function apiRequest(string $path, array $data, string $method = 'GET', bool $returnArray = false) 
     {
+
+
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
 
@@ -332,14 +342,41 @@ class ApiManager extends ApiDefintion
     }
 
     /** 
+     * Clean message in case it comes from fail2ban <matches>
+     * https://wiki.shaunc.com/wikka.php?wakka=ReportingToAbuseIPDBWithFail2Ban
+     * 
+     * @access public
+     * @param string      $message           The original message 
+     *  
+	 * @return string
+     */
+    protected function cleanMessage(string $message)
+    {
+        // Remove backslashes and sensitive information from the report
+        $message = str_replace('\\', '', $message);
+
+        // Remove self ips
+        foreach ($this->myIps as $ip){
+            $message = str_replace($ip, '[MUNGED]', $message);
+        } 
+
+        // If we're reporting spam, further munge any email addresses in the report
+        $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
+        $emailRemplacement = "[MUNGED]";
+        preg_replace($emailPattern, $emailRemplacement, $message);
+        
+        return $message;
+    }
+
+    /** 
      * Load and returns decoded Json from given file  
      *
      * @access public
      * @static
 	 * @param string    $filePath       The file's full path
-	 * @param bool     [$trowError]     Throw error on true or silent process. Default is true
+	 * @param bool      $trowError      Throw error on true or silent process. Default is true
      *  
-	 * @return string|null 
+	 * @return object|null 
      * @throws \Exception
      * @throws \LogicException
      */
