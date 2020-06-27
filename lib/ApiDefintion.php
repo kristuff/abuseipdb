@@ -170,14 +170,12 @@ abstract class ApiDefintion
      */
     protected function getCategoryIndex(string $value, int $index)
     {
-        $i = -1;
+        $i = 0;
         foreach ($this->aipdbApiCategories as $cat){
-            
-            $i++;
-
             if ($cat[$index] === $value) {
                 return $i;
             }
+            $i++;
          }
 
         // not found
