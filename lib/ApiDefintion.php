@@ -83,8 +83,8 @@ abstract class ApiDefintion
         // Scanning for open ports and vulnerable services.
         ['scan'            , '14', 'Port Scan', true],        
        
-        // seems to can't be used alone
-        ['hack'            , '15', 'Hacking', false],           
+        // 
+        ['hack'            , '15', 'Hacking', true],           
 
         // Attempts at SQL injection.
         ['sql'             , '16', 'SQL Injection', true],     
