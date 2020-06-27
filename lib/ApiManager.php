@@ -356,7 +356,7 @@ class ApiManager extends ApiDefintion
         $message = str_replace('\\', '', $message);
 
         // Remove self ips
-        foreach ($this->myIps as $ip){
+        foreach ($this->selfIps as $ip){
             $message = str_replace($ip, '[MUNGED]', $message);
         } 
 
