@@ -356,15 +356,16 @@ class ApiManager extends ApiDefintion
 
         // Remove self ips
         foreach ($this->selfIps as $ip){
-            $message = str_replace($ip, '[MUNGED]', $message);
+            $message = str_replace($ip, '[-]', $message);
         } 
 
         // If we're reporting spam, further munge any email addresses in the report
         $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
-        $emailRemplacement = "[MUNGED]";
+        $emailRemplacement = "[-]";
         $message = preg_replace($emailPattern, $emailRemplacement, $message);
         
-        return $message;
+        // Make sure message is less 1024 chars
+        return substr($message, 0,1024);
     }
 
     /** 
