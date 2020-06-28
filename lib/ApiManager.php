@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.1
+ * @version    0.9.2
  * @copyright  2020 Kristuff
  */
 
@@ -357,15 +357,14 @@ class ApiManager extends ApiDefintion
         // Remove self ips
         foreach ($this->selfIps as $ip){
             $message = str_replace($ip, '[-]', $message);
-        } 
+        }
 
         // If we're reporting spam, further munge any email addresses in the report
         $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
-        $emailRemplacement = "[-]";
-        $message = preg_replace($emailPattern, $emailRemplacement, $message);
+        $message = preg_replace($emailPattern, "[-]", $message);
         
         // Make sure message is less 1024 chars
-        return substr($message, 0,1024);
+        return substr($message, 0, 1024);
     }
 
     /** 
