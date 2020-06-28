@@ -13,6 +13,7 @@ Features
 --------
 - **✓** Single check request
 - **✓** Single report request
+- **✓** Auto cleaning report comment from sensitive data 
 - *\[TODO\]* Check block request  
 - *\[TODO\]* Bulk report request
 
