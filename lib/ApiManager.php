@@ -177,10 +177,11 @@ class ApiManager extends ApiDefintion
         $msg = $this->cleanMessage($message);
 
         // report AbuseIPDB request
-        return $this->apiRequest('report', [
-            'ip' => $ip,
-            'categories' => $cats,
-            'comment' => $msg
+        return $this->apiRequest(
+            'report', [
+                'ip' => $ip,
+                'categories' => $cats,
+                'comment' => $msg
             ],
             'POST', $returnArray
         );
@@ -305,8 +306,6 @@ class ApiManager extends ApiDefintion
      */
     protected function apiRequest(string $path, array $data, string $method = 'GET', bool $returnArray = false) 
     {
-
-
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
 
@@ -363,7 +362,7 @@ class ApiManager extends ApiDefintion
         // If we're reporting spam, further munge any email addresses in the report
         $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
         $emailRemplacement = "[MUNGED]";
-        preg_replace($emailPattern, $emailRemplacement, $message);
+        $message = preg_replace($emailPattern, $emailRemplacement, $message);
         
         return $message;
     }
