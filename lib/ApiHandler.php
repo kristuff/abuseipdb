@@ -14,18 +14,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.2
- * @copyright  2020 Kristuff
+ * @version    0.9.3
+ * @copyright  2020-2021 Kristuff
  */
 
 namespace Kristuff\AbuseIPDB;
 
 /**
- * Class ApiManager
+ * Class ApiHandler
  * 
  * The main class to work with the AbuseIPDB API v2 
  */
-class ApiManager extends ApiDefintion
+class ApiHandler extends ApiDefintion
 {
     /**
      * AbuseIPDB API key
@@ -109,7 +109,6 @@ class ApiManager extends ApiDefintion
             throw new InvalidPermissionException('The file [' . $configPath . '] is not readable.');
         }
 
-        // todo check file exist
         $keyConfig = self::loadJsonFile($configPath);
         $selfIps = [];
         
@@ -119,7 +118,7 @@ class ApiManager extends ApiDefintion
             $selfIps = self::loadJsonFile($selfIpsConfigPath)->self_ips;
         }
 
-        $app = new ApiManager($keyConfig->api_key, $keyConfig->user_id, $selfIps);
+        $app = new self($keyConfig->api_key, $keyConfig->user_id, $selfIps);
         
         return $app;
     }
@@ -177,7 +176,7 @@ class ApiManager extends ApiDefintion
         $msg = $this->cleanMessage($message);
 
         // report AbuseIPDB request
-        return $this->apiRequest(
+        $response = $this->apiRequest(
             'report', [
                 'ip' => $ip,
                 'categories' => $cats,
@@ -185,6 +184,8 @@ class ApiManager extends ApiDefintion
             ],
             'POST', $returnArray
         );
+
+        return json_decode($response, $returnArray);
     }
 
     /**
@@ -252,28 +253,21 @@ class ApiManager extends ApiDefintion
      * 
      * @access public
      * @param string    $ip             The ip to check
-     * @param string    $maxAge         Max age in days
+     * @param int       $maxAge         Max age in days
      * @param bool      $verbose        True to get the full response. Default is false
      * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
      * 
      * @return object|array
-     * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
-     *                                      greater than 365, or when ip value was not set. 
+     * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when ip value was not set. 
      */
-    public function check(string $ip = null, string $maxAge = '30', bool $verbose = false, bool $returnArray = false)
+    public function check(string $ip = null, int $maxAge = 30, bool $verbose = false, bool $returnArray = false)
     {
-        
-        if (!is_numeric($maxAge)){
-            throw new \InvalidArgumentException('maxAge must be a numeric value (' . $maxAge . ' was given)');
-        }
-        $maxAge = intval($maxAge);
-
-        // max age must less or equal to 365
+        // max age must be less or equal to 365
         if ($maxAge > 365 || $maxAge < 1){
             throw new \InvalidArgumentException('maxAge must be at least 1 and less than 365 (' . $maxAge . ' was given)');
         }
 
-        //ip must be set
+        // ip must be set
         if (empty($ip)){
             throw new \InvalidArgumentException('ip argument must be set (null given)');
         }
@@ -290,7 +284,49 @@ class ApiManager extends ApiDefintion
         }
 
         // check AbuseIPDB request
-        return $this->apiRequest('check', $data, 'GET', $returnArray) ;
+        $response = $this->apiRequest('check', $data, 'GET', $returnArray) ;
+
+        return json_decode($response, $returnArray);
+    }
+
+    /**
+     * Perform a 'blacklist' api request
+     * 
+     * @access public
+     * @param int       $limit          The blacklist limit. Default is TODO (the api default limit) 
+     * @param bool      $plainText      True to get the response in plain text list. Default is false
+     * @param bool      $returnArray    True to return an indexed array instead of an object (when $plainText is set to false). Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
+     *                                      greater than 365, or when ip value was not set. 
+     */
+    public function getBlacklist(int $limit = 10000, bool $plainText = false, bool $returnArray = false)
+    {
+
+        if ($limit < 1){
+            throw new \InvalidArgumentException('limit must be at least 1 (' . $limit . ' was given)');
+        }
+
+        // minimal data
+        $data = [
+            'confidenceMinimum' => 100, // The abuseConfidenceScore parameter is a subscriber feature. 
+            'limit'             => $limit,
+        ];
+
+        // plaintext paremeter has no value and must be added only when true 
+        // (set plaintext=false won't work)
+        if ($plainText){
+            $data['plaintext'] = $plainText;
+        }
+
+        $response = $this->apiRequest('blacklist', $data, 'GET');
+
+        if ($plainText){
+            return $response;
+        } 
+       
+        return json_decode($response, $returnArray);
     }
 
     /**
@@ -302,7 +338,7 @@ class ApiManager extends ApiDefintion
      * @param string    $method         The request method. Default is 'GET' 
      * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
      * 
-     * @return object|array
+     * @return mixed
      */
     protected function apiRequest(string $path, array $data, string $method = 'GET', bool $returnArray = false) 
     {
@@ -324,7 +360,8 @@ class ApiManager extends ApiDefintion
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
       
-        // set the AbuseIPDB API Key as a header
+        // set the wanted format, JSON (required to prevent having full html page on error)
+        // and the AbuseIPDB API Key as a header
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/json;',
             'Key: ' . $this->aipdbApiKey,
@@ -336,13 +373,14 @@ class ApiManager extends ApiDefintion
       // close connection
       curl_close($ch);
   
-      // return response as object / array
-      return json_decode($result, $returnArray);
+      // return response as JSON data
+      return $result;
     }
 
     /** 
      * Clean message in case it comes from fail2ban <matches>
-     * https://wiki.shaunc.com/wikka.php?wakka=ReportingToAbuseIPDBWithFail2Ban
+     * Remove backslashes and sensitive information from the report
+     * @see https://wiki.shaunc.com/wikka.php?wakka=ReportingToAbuseIPDBWithFail2Ban
      * 
      * @access public
      * @param string      $message           The original message 
@@ -351,17 +389,17 @@ class ApiManager extends ApiDefintion
      */
     protected function cleanMessage(string $message)
     {
-        // Remove backslashes and sensitive information from the report
+        // Remove backslashes
         $message = str_replace('\\', '', $message);
 
         // Remove self ips
         foreach ($this->selfIps as $ip){
-            $message = str_replace($ip, '[-]', $message);
+            $message = str_replace($ip, '*', $message);
         }
 
         // If we're reporting spam, further munge any email addresses in the report
         $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
-        $message = preg_replace($emailPattern, "[-]", $message);
+        $message = preg_replace($emailPattern, "*", $message);
         
         // Make sure message is less 1024 chars
         return substr($message, 0, 1024);

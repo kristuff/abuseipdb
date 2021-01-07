@@ -1,6 +1,6 @@
 {
     "name": "kristuff/abuseipdb",
-    "description": "A library to work with the AbuseIPDB api V2",
+    "description": "A wrapper for AbuseIPDB API v2",
     "type": "library",
     "license": "MIT",
     "authors": [

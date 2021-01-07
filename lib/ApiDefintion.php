@@ -14,8 +14,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.2
- * @copyright  2020 Kristuff
+ * @version    0.9.3
+ * @copyright  2020-2021 Kristuff
  */
 
 namespace Kristuff\AbuseIPDB;
@@ -28,15 +28,18 @@ namespace Kristuff\AbuseIPDB;
  */
 abstract class ApiDefintion
 {
-     /**
+    /**
      * AbuseIPDB API v2 Endpoint
-     * @var string $api_endpoint  
+     * @var string  
      */
     protected $aipdbApiEndpoint = 'https://api.abuseipdb.com/api/v2/'; 
 
     /**
      * AbuseIPDB API v2 categories
-     * @var array $aipdbApiCategories
+     * shorname, id (string), long name
+     * last paramter is false when the category cant' be used alone
+     * 
+     * @var array
      */
     protected $aipdbApiCategories = [
         

@@ -1,11 +1,10 @@
 # Kristuff\AbuseIPDB
-> A mini library to work with the AbuseIPDB api V2
+> A wrapper for AbuseIPDB API v2
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/kristuff/abuseipdb/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/kristuff/abuseipdb/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/kristuff/abuseipdb/badges/build.png?b=master)](https://scrutinizer-ci.com/g/kristuff/abuseipdb/build-status/master)
 [![Latest Stable Version](https://poser.pugx.org/kristuff/abuseipdb/v/stable)](https://packagist.org/packages/kristuff/abuseipdb)
 [![License](https://poser.pugx.org/kristuff/abuseipdb/license)](https://packagist.org/packages/kristuff/abuseipdb)
-
 
 ***see also [kristuff/abuseipdb-cli](https://github.com/kristuff/abuseipdb-cli) for the `CLI` version***
 
@@ -14,6 +13,7 @@ Features
 - **✓** Single check request
 - **✓** Single report request
 - **✓** Auto cleaning report comment from sensitive data 
+- **✓** Blacklist request
 - *\[TODO\]* Check block request  
 - *\[TODO\]* Bulk report request
 
@@ -31,7 +31,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": ">=0.9.2-stable"
+    "kristuff/abuseipdb": ">=0.9.3-stable"
 },
 ```
 
@@ -49,7 +49,7 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2020 Kristuff
+Copyright (c) 2020-2021 Kristuff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
