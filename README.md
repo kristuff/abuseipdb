@@ -10,11 +10,12 @@
 
 Features
 --------
-- **✓** Single check request
+- **✓** Single IP check request
+- **✓** Check IP block request
 - **✓** Single report request
 - **✓** Auto cleaning report comment from sensitive data 
 - **✓** Blacklist request
-- *\[TODO\]* Check block request  
+- *\[TODO\]* clear address block request  
 - *\[TODO\]* Bulk report request
 
 Requirements
@@ -31,7 +32,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": ">=0.9.3-stable"
+    "kristuff/abuseipdb": ">=0.9.4-stable"
 },
 ```
 
