@@ -13,8 +13,8 @@ Features
 - Single IP check request **✓** 
 - IP block check request **✓** 
 - Blacklist request **✓** 
-- Single report request **✓** 
-- Clear address request (remove own reports) **✓**
+- Single IP report request **✓** 
+- Clear IP address request (remove own reports) **✓**
 - Auto cleaning report comment from sensitive data  **✓** 
 
 **Not implemented:**
