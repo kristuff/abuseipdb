@@ -164,14 +164,14 @@ class ApiHandler extends ApiDefintion
         $cats = $this->validateReportCategories($categories);
         $msg = $this->cleanMessage($message);
 
-        // report AbuseIPDB request
+        // AbuseIPDB request
         $response = $this->apiRequest(
             'report', [
                 'ip' => $ip,
                 'categories' => $cats,
                 'comment' => $msg
             ],
-            'POST', $returnArray
+            'POST'
         );
 
         return json_decode($response, $returnArray);
@@ -238,47 +238,11 @@ class ApiHandler extends ApiDefintion
             'maxAgeInDays'  => $maxAge,  
         ];
 
-        $response = $this->apiRequest('check-block', $data, 'GET', $returnArray) ;
+        $response = $this->apiRequest('check-block', $data, 'GET') ;
 
         return json_decode($response, $returnArray);
     }
    
-    /**
-     * Perform a 'clear-address' api request
-     * 
-     *  Sample response:
-     * 
-     *    {
-     *      "data": {
-     *        "numReportsDeleted": 0
-     *      }
-     *    }
-     * 
-     * 
-     * @access public
-     * @param string    $ip             The ip to check
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
-     * 
-     * @return object|array
-     * @throws \InvalidArgumentException    When ip value was not set. 
-     */
-    public function clear(string $ip = null, bool $returnArray = false)
-    {
-        // ip must be set
-        if (empty($ip)){
-            throw new \InvalidArgumentException('ip argument must be set (null given)');
-        }
-
-        // minimal data
-        $data = [
-            'ipAddress'     => $ip, 
-        ];
-
-        $response = $this->apiRequest('clear-address', $data, 'DELETE', $returnArray) ;
-
-        return json_decode($response, $returnArray);
-    }
-
     /**
      * Perform a 'check' api request
      * 
@@ -314,8 +278,43 @@ class ApiHandler extends ApiDefintion
            $data['verbose'] = true;
         }
 
-        $response = $this->apiRequest('check', $data, 'GET', $returnArray) ;
+        $response = $this->apiRequest('check', $data, 'GET') ;
 
+        return json_decode($response, $returnArray);
+    }
+
+ /**
+     * Perform a 'clear-address' api request
+     * 
+     *  Sample response:
+     * 
+     *    {
+     *      "data": {
+     *        "numReportsDeleted": 0
+     *      }
+     *    }
+     * 
+     * 
+     * @access public
+     * @param string    $ip             The ip to check
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    When ip value was not set. 
+     */
+    public function clear(string $ip = null, bool $returnArray = false)
+    {
+        // ip must be set
+        if (empty($ip)){
+            throw new \InvalidArgumentException('ip argument must be set (null given)');
+        }
+
+        // minimal data
+        $data = [
+            'ipAddress'     => $ip, 
+        ];
+
+        $response = $this->apiRequest('clear-address', $data, "DELETE") ;
         return json_decode($response, $returnArray);
     }
 
@@ -430,7 +429,7 @@ class ApiHandler extends ApiDefintion
      * 
      * @return mixed
      */
-    protected function apiRequest(string $path, array $data, string $method = 'GET', bool $returnArray = false) 
+    protected function apiRequest(string $path, array $data, string $method = 'GET') 
     {
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
@@ -439,13 +438,14 @@ class ApiHandler extends ApiDefintion
         $ch = curl_init(); 
   
         // set the method and data to send
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         if ($method == 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         } else {
             $url .= '?' . http_build_query($data);
         }
-         
+
         // set the url to call
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
@@ -463,7 +463,7 @@ class ApiHandler extends ApiDefintion
       // close connection
       curl_close($ch);
   
-      // return response as JSON data
+      // return response as is (JSON or plain text)
       return $result;
     }
 
