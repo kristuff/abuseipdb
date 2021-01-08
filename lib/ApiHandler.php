@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.4
+ * @version    0.9.5
  * @copyright  2020-2021 Kristuff
  */
 
@@ -86,13 +86,13 @@ class ApiHandler extends ApiDefintion
     }
 
     /**
-     * Get a new instance of ApiManager with config stored in a Json file
+     * Get a new instance of ApiHandler with config stored in a Json file
      * 
      * @access public 
      * @static
      * @param string    $configPath     The configuration file path
      * 
-     * @return \Kristuff\AbuseIPDB\ApiManager
+     * @return \Kristuff\AbuseIPDB\ApiHandler
      * @throws \InvalidArgumentException                        If the given file does not exist
      * @throws \Kristuff\AbuseIPDB\InvalidPermissionException   If the given file is not readable 
      */
@@ -124,17 +124,6 @@ class ApiHandler extends ApiDefintion
     }
 
     /**
-     * Get the list of report categories
-     * 
-     * @access public 
-     * @return array
-     */
-    public function getCategories()
-    {
-        return $this->aipdbApiCategories;
-    }
-
-    /**
      * Performs a 'report' api request
      * 
      * Result, in json format will be something like this:
@@ -149,7 +138,7 @@ class ApiHandler extends ApiDefintion
      * @param string    $ip             The ip to report
      * @param string    $categories     The report categories
      * @param string    $message        The report message
-     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
      *
      * @return object|array
      * @throws \InvalidArgumentException
@@ -226,7 +215,7 @@ class ApiHandler extends ApiDefintion
      * @access public
      * @param string    $network        The network to check
      * @param int       $maxAge         Max age in days
-     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
      * 
      * @return object|array
      * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when network value was not set. 
@@ -255,13 +244,49 @@ class ApiHandler extends ApiDefintion
     }
    
     /**
+     * Perform a 'clear-address' api request
+     * 
+     *  Sample response:
+     * 
+     *    {
+     *      "data": {
+     *        "numReportsDeleted": 0
+     *      }
+     *    }
+     * 
+     * 
+     * @access public
+     * @param string    $ip             The ip to check
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    When ip value was not set. 
+     */
+    public function clear(string $ip = null, bool $returnArray = false)
+    {
+        // ip must be set
+        if (empty($ip)){
+            throw new \InvalidArgumentException('ip argument must be set (null given)');
+        }
+
+        // minimal data
+        $data = [
+            'ipAddress'     => $ip, 
+        ];
+
+        $response = $this->apiRequest('check', $data, 'DELETE', $returnArray) ;
+
+        return json_decode($response, $returnArray);
+    }
+
+    /**
      * Perform a 'check' api request
      * 
      * @access public
      * @param string    $ip             The ip to check
      * @param int       $maxAge         Max age in days
      * @param bool      $verbose        True to get the full response. Default is false
-     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
      * 
      * @return object|array
      * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when ip value was not set. 
@@ -289,7 +314,6 @@ class ApiHandler extends ApiDefintion
            $data['verbose'] = true;
         }
 
-        // check AbuseIPDB request
         $response = $this->apiRequest('check', $data, 'GET', $returnArray) ;
 
         return json_decode($response, $returnArray);
@@ -301,7 +325,7 @@ class ApiHandler extends ApiDefintion
      * @access public
      * @param int       $limit          The blacklist limit. Default is TODO (the api default limit) 
      * @param bool      $plainText      True to get the response in plain text list. Default is false
-     * @param bool      $returnArray    True to return an indexed array instead of an object (when $plainText is set to false). Default is false. 
+     * @param bool      $returnArray    True to return an indexed array instead of object (when $plainText is set to false). Default is false. 
      * 
      * @return object|array
      * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 

@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.4
+ * @version    0.9.5
  * @copyright  2020-2021 Kristuff
  */
 
@@ -120,7 +120,18 @@ abstract class ApiDefintion
         // Abuse was targeted at an "Internet of Things" type device. Include 
         // information about what type of device was targeted in the comments.         
         ['oit'             , '23', 'IoT Targeted', true],     
-      ];
+    ];
+
+    /**
+     * Get the list of report categories
+     * 
+     * @access public 
+     * @return array
+     */
+    public function getCategories()
+    {
+        return $this->aipdbApiCategories;
+    }
 
     /**
      * Get the category id corresponding to given name

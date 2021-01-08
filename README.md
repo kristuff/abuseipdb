@@ -14,11 +14,11 @@ Features
 - IP block check request **✓** 
 - Blacklist request **✓** 
 - Single report request **✓** 
+- Clear address request (remove own reports) **✓**
 - Auto cleaning report comment from sensitive data  **✓** 
 
-TODO
-- *\[TODO\] clear address request*  
-- *\[TODO\] Bulk report request*
+**Not implemented:**
+- *\[TODO\] Bulk report Api request*
 
 Requirements
 ------------    
@@ -34,7 +34,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": ">=0.9.4-stable"
+    "kristuff/abuseipdb": ">=0.9.5-stable"
 },
 ```
 
