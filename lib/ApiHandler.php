@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.5
+ * @version    0.9.6
  * @copyright  2020-2021 Kristuff
  */
 
@@ -274,7 +274,7 @@ class ApiHandler extends ApiDefintion
             'ipAddress'     => $ip, 
         ];
 
-        $response = $this->apiRequest('check', $data, 'DELETE', $returnArray) ;
+        $response = $this->apiRequest('clear-address', $data, 'DELETE', $returnArray) ;
 
         return json_decode($response, $returnArray);
     }
@@ -327,7 +327,7 @@ class ApiHandler extends ApiDefintion
      * @param bool      $plainText      True to get the response in plain text list. Default is false
      * @param bool      $returnArray    True to return an indexed array instead of object (when $plainText is set to false). Default is false. 
      * 
-     * @return object|array
+     * @return object|array|string
      * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
      *                                      greater than 365, or when ip value was not set. 
      */
@@ -501,7 +501,7 @@ class ApiHandler extends ApiDefintion
      * @access public
      * @static
 	 * @param string    $filePath       The file's full path
-	 * @param bool      $trowError      Throw error on true or silent process. Default is true
+	 * @param bool      $throwError     Throw error on true or silent process. Default is true
      *  
 	 * @return object|null 
      * @throws \Exception

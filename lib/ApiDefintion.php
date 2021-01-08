@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.5
+ * @version    0.9.6
  * @copyright  2020-2021 Kristuff
  */
 
