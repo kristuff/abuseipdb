@@ -10,13 +10,15 @@
 
 Features
 --------
-- **✓** Single IP check request
-- **✓** Check IP block request
-- **✓** Single report request
-- **✓** Auto cleaning report comment from sensitive data 
-- **✓** Blacklist request
-- *\[TODO\]* clear address block request  
-- *\[TODO\]* Bulk report request
+- Single IP check request **✓** 
+- IP block check request **✓** 
+- Blacklist request **✓** 
+- Single report request **✓** 
+- Auto cleaning report comment from sensitive data  **✓** 
+
+TODO
+- *\[TODO\] clear address request*  
+- *\[TODO\] Bulk report request*
 
 Requirements
 ------------    
