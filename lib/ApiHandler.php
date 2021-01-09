@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.6
+ * @version    0.9.7
  * @copyright  2020-2021 Kristuff
  */
 
@@ -25,23 +25,12 @@ namespace Kristuff\AbuseIPDB;
  * 
  * The main class to work with the AbuseIPDB API v2 
  */
-class ApiHandler extends ApiDefintion
+class ApiHandler extends ApiBase
 {
     /**
-     * AbuseIPDB API key
-     *  
-     * @access protected
-     * @var string $aipdbApiKey  
+     * Curl helper functions
      */
-    protected $aipdbApiKey = null; 
-
-    /**
-     * AbuseIPDB user id 
-     * 
-     * @access protected
-     * @var string $aipdbUserId  
-     */
-    protected $aipdbUserId = null; 
+    use CurlTrait;
 
     /**
      * The ips to remove from message
@@ -80,7 +69,6 @@ class ApiHandler extends ApiDefintion
             'userId'  => $this->aipdbUserId,
             'apiKey'  => $this->aipdbApiKey,
             'selfIps' => $this->selfIps,
-            
             // TODO  default report cat 
         );
     }
@@ -178,6 +166,134 @@ class ApiHandler extends ApiDefintion
     }
 
     /**
+     * Performs a 'bulk-report' api request
+     * 
+     * Result, in json format will be something like this:
+     *   {
+     *     "data": {
+     *       "savedReports": 60,
+     *       "invalidReports": [
+     *         {
+     *           "error": "Duplicate IP",
+     *           "input": "41.188.138.68",
+     *           "rowNumber": 5
+     *         },
+     *         {
+     *           "error": "Invalid IP",
+     *           "input": "127.0.foo.bar",
+     *           "rowNumber": 6
+     *         },
+     *         {
+     *           "error": "Invalid Category",
+     *           "input": "189.87.146.50",
+     *           "rowNumber": 8
+     *         }
+     *       ]
+     *     }
+     *   }
+     *  
+     * @access public
+     * @param string    $ip             The ip to report
+     * @param string    $categories     The report categories
+     * @param string    $message        The report message
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     *
+     * @return object|array
+     * @throws \InvalidArgumentException
+     */
+    public function bulkReport(string $filePath, bool $returnArray = false)
+    {
+        // check file exists
+        if (!file_exists($filePath) || !is_file($filePath)){
+            throw new \InvalidArgumentException('The file [' . $filePath . '] does not exist.');
+        }
+
+        // check file is readable
+        if (!is_readable($filePath)){
+            throw new InvalidPermissionException('The file [' . $filePath . '] is not readable.');
+        }
+
+        // AbuseIPDB request
+        $response = $this->apiRequest('bulk-report', [], 'POST', $filePath);
+
+        return json_decode($response, $returnArray);
+    }
+
+    /**
+     * Perform a 'clear-address' api request
+     * 
+     *  Sample response:
+     * 
+     *    {
+     *      "data": {
+     *        "numReportsDeleted": 0
+     *      }
+     *    }
+     * 
+     * @access public
+     * @param string    $ip             The ip to check
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    When ip value was not set. 
+     */
+    public function clear(string $ip = null, bool $returnArray = false)
+    {
+        // ip must be set
+        if (empty($ip)){
+            throw new \InvalidArgumentException('ip argument must be set (null given)');
+        }
+
+        // minimal data
+        $data = [
+            'ipAddress'     => $ip, 
+        ];
+
+        $response = $this->apiRequest('clear-address', $data, "DELETE") ;
+        return json_decode($response, $returnArray);
+    }
+
+    /**
+     * Perform a 'check' api request
+     * 
+     * @access public
+     * @param string    $ip             The ip to check
+     * @param int       $maxAge         Max age in days
+     * @param bool      $verbose        True to get the full response. Default is false
+     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * 
+     * @return object|array
+     * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when ip value was not set. 
+     */
+    public function check(string $ip = null, int $maxAge = 30, bool $verbose = false, bool $returnArray = false)
+    {
+        // max age must be less or equal to 365
+        if ($maxAge > 365 || $maxAge < 1){
+            throw new \InvalidArgumentException('maxAge must be at least 1 and less than 365 (' . $maxAge . ' was given)');
+        }
+
+        // ip must be set
+        if (empty($ip)){
+            throw new \InvalidArgumentException('ip argument must be set (null given)');
+        }
+
+        // minimal data
+        $data = [
+            'ipAddress'     => $ip, 
+            'maxAgeInDays'  => $maxAge,  
+        ];
+
+        // option
+        if ($verbose){
+           $data['verbose'] = true;
+        }
+
+        $response = $this->apiRequest('check', $data, 'GET') ;
+
+        return json_decode($response, $returnArray);
+    }
+
+    /**
      * Perform a 'check-block' api request
      * 
      * 
@@ -242,81 +358,6 @@ class ApiHandler extends ApiDefintion
 
         return json_decode($response, $returnArray);
     }
-   
-    /**
-     * Perform a 'check' api request
-     * 
-     * @access public
-     * @param string    $ip             The ip to check
-     * @param int       $maxAge         Max age in days
-     * @param bool      $verbose        True to get the full response. Default is false
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
-     * 
-     * @return object|array
-     * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when ip value was not set. 
-     */
-    public function check(string $ip = null, int $maxAge = 30, bool $verbose = false, bool $returnArray = false)
-    {
-        // max age must be less or equal to 365
-        if ($maxAge > 365 || $maxAge < 1){
-            throw new \InvalidArgumentException('maxAge must be at least 1 and less than 365 (' . $maxAge . ' was given)');
-        }
-
-        // ip must be set
-        if (empty($ip)){
-            throw new \InvalidArgumentException('ip argument must be set (null given)');
-        }
-
-        // minimal data
-        $data = [
-            'ipAddress'     => $ip, 
-            'maxAgeInDays'  => $maxAge,  
-        ];
-
-        // option
-        if ($verbose){
-           $data['verbose'] = true;
-        }
-
-        $response = $this->apiRequest('check', $data, 'GET') ;
-
-        return json_decode($response, $returnArray);
-    }
-
- /**
-     * Perform a 'clear-address' api request
-     * 
-     *  Sample response:
-     * 
-     *    {
-     *      "data": {
-     *        "numReportsDeleted": 0
-     *      }
-     *    }
-     * 
-     * 
-     * @access public
-     * @param string    $ip             The ip to check
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
-     * 
-     * @return object|array
-     * @throws \InvalidArgumentException    When ip value was not set. 
-     */
-    public function clear(string $ip = null, bool $returnArray = false)
-    {
-        // ip must be set
-        if (empty($ip)){
-            throw new \InvalidArgumentException('ip argument must be set (null given)');
-        }
-
-        // minimal data
-        $data = [
-            'ipAddress'     => $ip, 
-        ];
-
-        $response = $this->apiRequest('clear-address', $data, "DELETE") ;
-        return json_decode($response, $returnArray);
-    }
 
     /**
      * Perform a 'blacklist' api request
@@ -357,67 +398,7 @@ class ApiHandler extends ApiDefintion
        
         return json_decode($response, $returnArray);
     }
-
-    /**
-     * Check if the category(ies) given is/are valid
-     * Check for shortname or id, and categories that can't be used alone 
-     * 
-     * @access protected
-     * @param array $categories       The report categories list
-     *
-     * @return string               Formatted string id list ('18,2,3...')
-     * @throws \InvalidArgumentException
-     */
-    protected function validateReportCategories(string $categories)
-    {
-        // the return categories string
-        $catsString = ''; 
-
-        // used when cat that can't be used alone
-        $needAnother = null;
-
-        // parse given categories
-        $cats = explode(',', $categories);
-
-        foreach ($cats as $cat) {
-
-            // get index on our array of categories
-            $catIndex    = is_numeric($cat) ? $this->getCategoryIndex($cat, 1) : $this->getCategoryIndex($cat, 0);
-
-            // check if found
-            if ($catIndex === false ){
-                throw new \InvalidArgumentException('Invalid report category was given : ['. $cat .  ']');
-            }
-
-            // get Id
-            $catId = $this->aipdbApiCategories[$catIndex][1];
-
-            // need another ?
-            if ($needAnother !== false){
-
-                // is a standalone cat ?
-                if ($this->aipdbApiCategories[$catIndex][3] === false) {
-                    $needAnother = true;
-
-                } else {
-                    // ok, continue with other at least one given
-                    // no need to reperform this check
-                    $needAnother = false;
-                }
-            }
-
-            // set or add to cats list 
-            $catsString = ($catsString === '') ? $catId : $catsString .','.$catId;
-        }
-
-        if ($needAnother !== false){
-            throw new \InvalidArgumentException('Invalid report category paremeter given: some categories can\'t be used alone');
-        }
-
-        // if here that ok
-        return $catsString;
-    }
-
+  
     /**
      * Perform a cURL request       
      * 
@@ -425,46 +406,56 @@ class ApiHandler extends ApiDefintion
      * @param string    $path           The api end path 
      * @param array     $data           The request data 
      * @param string    $method         The request method. Default is 'GET' 
-     * @param bool      $returnArray    True to return an indexed array instead of an object. Default is false. 
+     * @param bool      $csvFilePath    The file path for csv file. When not empty, $data parameter is ignored and in place,
+     *                                  the content of the given file if passed as csv. Default is empty string. 
      * 
      * @return mixed
+     * @throws \RuntimeException
      */
-    protected function apiRequest(string $path, array $data, string $method = 'GET') 
+    protected function apiRequest(string $path, array $data, string $method = 'GET', string $csvFilePath = '') 
     {
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
 
+        // set the wanted format, JSON (required to prevent having full html page on error)
+        // and the AbuseIPDB API Key as a header
+        $headers = [
+            'Accept: application/json;',
+            'Key: ' . $this->aipdbApiKey,
+        ];
+
         // open curl connection
         $ch = curl_init(); 
   
+        // for csv
+        if (!empty($csvFilePath)){
+            $cfile = new \CurlFile($csvFilePath,  'text/csv', 'csv');
+            //curl file itself return the realpath with prefix of @
+            $data = array('csv' => $cfile);
+        }
+
         // set the method and data to send
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         if ($method == 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            $this->setCurlOption($ch, CURLOPT_POST, true);
+            $this->setCurlOption($ch, CURLOPT_POSTFIELDS, $data);
         } else {
+            $this->setCurlOption($ch, CURLOPT_CUSTOMREQUEST, $method);
             $url .= '?' . http_build_query($data);
         }
 
         // set the url to call
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-      
-        // set the wanted format, JSON (required to prevent having full html page on error)
-        // and the AbuseIPDB API Key as a header
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/json;',
-            'Key: ' . $this->aipdbApiKey,
-        ]);
+        $this->setCurlOption($ch, CURLOPT_URL, $url);
+        $this->setCurlOption($ch, CURLOPT_RETURNTRANSFER, 1); 
+        $this->setCurlOption($ch, CURLOPT_HTTPHEADER, $headers);
+    
+        // execute curl call
+        $result = curl_exec($ch);
+    
+        // close connection
+        curl_close($ch);
   
-      // execute curl call
-      $result = curl_exec($ch);
-  
-      // close connection
-      curl_close($ch);
-  
-      // return response as is (JSON or plain text)
-      return $result;
+        // return response as is (JSON or plain text)
+        return $result;
     }
 
     /** 
@@ -518,14 +509,12 @@ class ApiHandler extends ApiDefintion
         }
 
         // get and parse content
-        $content = file_get_contents($filePath);
-        $json    = json_decode(utf8_encode($content));
+        $content = utf8_encode(file_get_contents($filePath));
+        $json    = json_decode($content);
 
         // check for errors
-        if ($json == null && json_last_error() != JSON_ERROR_NONE){
-            if ($throwError) {
-                throw new \LogicException(sprintf("Failed to parse config file Error: '%s'", json_last_error_msg()));
-            }
+        if ($json == null && json_last_error() != JSON_ERROR_NONE && $throwError) {
+            throw new \LogicException(sprintf("Failed to parse config file Error: '%s'", json_last_error_msg()));
         }
 
         return $json;        

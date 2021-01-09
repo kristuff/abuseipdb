@@ -14,25 +14,41 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.6
+ * @version    0.9.7
  * @copyright  2020-2021 Kristuff
  */
 
 namespace Kristuff\AbuseIPDB;
 
 /**
- * Class ApiDefintion
+ * Class ApiBase
  * 
- * Abstract base class for ApiManager
+ * Abstract base class for ApiHanlder
  * Contains main hard coded api settings
  */
-abstract class ApiDefintion
+abstract class ApiBase
 {
     /**
      * AbuseIPDB API v2 Endpoint
      * @var string  
      */
     protected $aipdbApiEndpoint = 'https://api.abuseipdb.com/api/v2/'; 
+
+    /**
+     * AbuseIPDB API key
+     *  
+     * @access protected
+     * @var string $aipdbApiKey  
+     */
+    protected $aipdbApiKey = null; 
+
+    /**
+     * AbuseIPDB user id 
+     * 
+     * @access protected
+     * @var string $aipdbUserId  
+     */
+    protected $aipdbUserId = null; 
 
     /**
      * AbuseIPDB API v2 categories
@@ -196,4 +212,63 @@ abstract class ApiDefintion
         return false;
     }
 
+    /**
+     * Check if the category(ies) given is/are valid
+     * Check for shortname or id, and categories that can't be used alone 
+     * 
+     * @access protected
+     * @param array $categories       The report categories list
+     *
+     * @return string               Formatted string id list ('18,2,3...')
+     * @throws \InvalidArgumentException
+     */
+    protected function validateReportCategories(string $categories)
+    {
+        // the return categories string
+        $catsString = ''; 
+
+        // used when cat that can't be used alone
+        $needAnother = null;
+
+        // parse given categories
+        $cats = explode(',', $categories);
+
+        foreach ($cats as $cat) {
+
+            // get index on our array of categories
+            $catIndex    = is_numeric($cat) ? $this->getCategoryIndex($cat, 1) : $this->getCategoryIndex($cat, 0);
+
+            // check if found
+            if ($catIndex === false ){
+                throw new \InvalidArgumentException('Invalid report category was given : ['. $cat .  ']');
+            }
+
+            // get Id
+            $catId = $this->aipdbApiCategories[$catIndex][1];
+
+            // need another ?
+            if ($needAnother !== false){
+
+                // is a standalone cat ?
+                if ($this->aipdbApiCategories[$catIndex][3] === false) {
+                    $needAnother = true;
+
+                } else {
+                    // ok, continue with other at least one given
+                    // no need to reperform this check
+                    $needAnother = false;
+                }
+            }
+
+            // set or add to cats list 
+            $catsString = ($catsString === '') ? $catId : $catsString .','.$catId;
+        }
+
+        if ($needAnother !== false){
+            throw new \InvalidArgumentException('Invalid report category paremeter given: some categories can\'t be used alone');
+        }
+
+        // if here that ok
+        return $catsString;
+    }
 }

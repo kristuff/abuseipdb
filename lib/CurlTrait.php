@@ -21,8 +21,24 @@
 namespace Kristuff\AbuseIPDB;
 
 /**
- * Custom Exception for not readable file
+ * cURL helper functions
  */
-class InvalidPermissionException extends \Exception
+trait CurlTrait
 {
+    /**
+     * helper to configure cURL option
+     *  
+     * @access protected
+     * @param resource  $ch
+     * @param int       $option
+     * @param mixed     $value
+     *   
+     * @return void
+     * @throws \RuntimeException
+     */
+    protected function setCurlOption($ch,int $option,$value){
+        if(!curl_setopt($ch,$option,$value)){
+            throw new \RuntimeException('curl_setopt failed! '.curl_error($ch));
+        }
+    }
 }
