@@ -14,9 +14,9 @@ Features
 - IP block check request **✓** 
 - Blacklist request **✓** 
 - Single IP report request **✓** 
-- Bulk report request (send cvs file) **✓** 
-- Clear IP address request (remove own reports) **✓**
-- Auto cleaning report comment from sensitive data  **✓** 
+- Bulk report request (send `csv` file) **✓** 
+- Clear IP address request (remove your own reports) **✓**
+- Auto cleaning report comments from sensitive data (email, custom ip/domain names list)  **✓** 
 
 Requirements
 ------------    
@@ -32,18 +32,18 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": ">=0.9.7-stable"
+    "kristuff/abuseipdb": ">=0.9.8-stable"
 },
 ```
 
-Usage
+More infos
 -----
 
-```php
-<?php
+- [Project website](https://kristuff.fr/projects/abuseipdb)
+- [Api documentation](https://kristuff.fr/projects/abuseipdb/doc)
+- [Config/Install guide](https://kristuff.fr/projects/abuseipdb/technical#configuration)
+- [CLI version](https://kristuff.fr/projects/abuseipdbcli)
 
-echo ('TODO');
-```
 
 License
 -------

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  *     _    _                    ___ ____  ____  ____
@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.7
+ * @version    0.9.8
  * @copyright  2020-2021 Kristuff
  */
 
@@ -33,11 +33,11 @@ class ApiHandler extends ApiBase
     use CurlTrait;
 
     /**
-     * The ips to remove from message
-     * Generally you will add to this list yours ipv4 and ipv6, and the hostname
+     * The ips to remove from report messages
+     * Generally you will add to this list yours ipv4 and ipv6, hostname, domain names
      * 
      * @access protected
-     * @var array $selfIps  
+     * @var array  
      */
     protected $selfIps = []; 
 
@@ -46,69 +46,28 @@ class ApiHandler extends ApiBase
      * 
      * @access public
      * @param string  $apiKey     The AbuseIPDB api key
-     * @param string  $userId     The AbuseIPDB user's id
-     * @param array   $myIps      The Ips/domain name you dont want to display in report messages
+     * @param array   $myIps      The Ips/domain name you don't want to display in report messages
      * 
      */
-    public function __construct(string $apiKey, string $userId, array $myIps = [])
+    public function __construct(string $apiKey, array $myIps = [])
     {
         $this->aipdbApiKey = $apiKey;
-        $this->aipdbUserId = $userId;
         $this->selfIps = $myIps;
     }
 
     /**
      * Get the current configuration in a indexed array
      * 
-     * @access public 
+     * @access public
+     * 
      * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return array(
-            'userId'  => $this->aipdbUserId,
             'apiKey'  => $this->aipdbApiKey,
             'selfIps' => $this->selfIps,
-            // TODO  default report cat 
         );
-    }
-
-    /**
-     * Get a new instance of ApiHandler with config stored in a Json file
-     * 
-     * @access public 
-     * @static
-     * @param string    $configPath     The configuration file path
-     * 
-     * @return \Kristuff\AbuseIPDB\ApiHandler
-     * @throws \InvalidArgumentException                        If the given file does not exist
-     * @throws \Kristuff\AbuseIPDB\InvalidPermissionException   If the given file is not readable 
-     */
-    public static function fromConfigFile(string $configPath)
-    {
-
-        // check file exists
-        if (!file_exists($configPath) || !is_file($configPath)){
-            throw new \InvalidArgumentException('The file [' . $configPath . '] does not exist.');
-        }
-
-        // check file is readable
-        if (!is_readable($configPath)){
-            throw new InvalidPermissionException('The file [' . $configPath . '] is not readable.');
-        }
-
-        $keyConfig = self::loadJsonFile($configPath);
-        $selfIps = [];
-        
-        // Look for other optional config files in the same directory 
-        $selfIpsConfigPath = pathinfo($configPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . 'self_ips.json';
-        if (file_exists($selfIpsConfigPath)){
-            $selfIps = self::loadJsonFile($selfIpsConfigPath)->self_ips;
-        }
-
-        $app = new self($keyConfig->api_key, $keyConfig->user_id, $selfIps);
-        
-        return $app;
     }
 
     /**
@@ -124,14 +83,14 @@ class ApiHandler extends ApiBase
      * 
      * @access public
      * @param string    $ip             The ip to report
-     * @param string    $categories     The report categories
+     * @param string    $categories     The report category(es)
      * @param string    $message        The report message
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
      *
-     * @return object|array
+     * @return ApiResponse
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
-    public function report(string $ip = '', string $categories = '', string $message = '', bool $returnArray = false)
+    public function report(string $ip, string $categories, string $message): ApiResponse
     {
          // ip must be set
         if (empty($ip)){
@@ -140,29 +99,27 @@ class ApiHandler extends ApiBase
 
         // categories must be set
         if (empty($categories)){
-            throw new \InvalidArgumentException('categories list was empty');
+            throw new \InvalidArgumentException('Categories list was empty');
         }
 
         // message must be set
-          if (empty($message)){
-            throw new \InvalidArgumentException('report message was empty');
+        if (empty($message)){
+            throw new \InvalidArgumentException('Report message was empty');
         }
 
         // validates categories, clean message 
         $cats = $this->validateReportCategories($categories);
-        $msg = $this->cleanMessage($message);
+        $msg  = $this->cleanMessage($message);
 
         // AbuseIPDB request
-        $response = $this->apiRequest(
+        return $this->apiRequest(
             'report', [
-                'ip' => $ip,
-                'categories' => $cats,
-                'comment' => $msg
+                'ip'            => $ip,
+                'categories'    => $cats,
+                'comment'       => $msg
             ],
             'POST'
         );
-
-        return json_decode($response, $returnArray);
     }
 
     /**
@@ -193,15 +150,13 @@ class ApiHandler extends ApiBase
      *   }
      *  
      * @access public
-     * @param string    $ip             The ip to report
-     * @param string    $categories     The report categories
-     * @param string    $message        The report message
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * @param string    $filePath       The CSV file path. Could be an absolute or relative path.
      *
-     * @return object|array
+     * @return ApiResponse
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
-    public function bulkReport(string $filePath, bool $returnArray = false)
+    public function bulkReport(string $filePath): ApiResponse
     {
         // check file exists
         if (!file_exists($filePath) || !is_file($filePath)){
@@ -213,10 +168,7 @@ class ApiHandler extends ApiBase
             throw new InvalidPermissionException('The file [' . $filePath . '] is not readable.');
         }
 
-        // AbuseIPDB request
-        $response = $this->apiRequest('bulk-report', [], 'POST', $filePath);
-
-        return json_decode($response, $returnArray);
+        return $this->apiRequest('bulk-report', [], 'POST', $filePath);
     }
 
     /**
@@ -231,26 +183,20 @@ class ApiHandler extends ApiBase
      *    }
      * 
      * @access public
-     * @param string    $ip             The ip to check
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * @param string    $ip             The IP to clear reports
      * 
-     * @return object|array
+     * @return ApiResponse
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException    When ip value was not set. 
      */
-    public function clear(string $ip = null, bool $returnArray = false)
+    public function clearAddress(string $ip): ApiResponse
     {
         // ip must be set
         if (empty($ip)){
-            throw new \InvalidArgumentException('ip argument must be set (null given)');
+            throw new \InvalidArgumentException('IP argument must be set.');
         }
 
-        // minimal data
-        $data = [
-            'ipAddress'     => $ip, 
-        ];
-
-        $response = $this->apiRequest('clear-address', $data, "DELETE") ;
-        return json_decode($response, $returnArray);
+        return $this->apiRequest('clear-address',  ['ipAddress' => $ip ], "DELETE") ;
     }
 
     /**
@@ -258,29 +204,29 @@ class ApiHandler extends ApiBase
      * 
      * @access public
      * @param string    $ip             The ip to check
-     * @param int       $maxAge         Max age in days
-     * @param bool      $verbose        True to get the full response. Default is false
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * @param int       $maxAgeInDays   Max age in days. Default is 30.
+     * @param bool      $verbose        True to get the full response (last reports and countryName). Default is false
      * 
-     * @return object|array
+     * @return ApiResponse
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when ip value was not set. 
      */
-    public function check(string $ip = null, int $maxAge = 30, bool $verbose = false, bool $returnArray = false)
+    public function check(string $ip, int $maxAgeInDays = 30, bool $verbose = false): ApiResponse
     {
         // max age must be less or equal to 365
-        if ($maxAge > 365 || $maxAge < 1){
-            throw new \InvalidArgumentException('maxAge must be at least 1 and less than 365 (' . $maxAge . ' was given)');
+        if ($maxAgeInDays > 365 || $maxAgeInDays < 1){
+            throw new \InvalidArgumentException('maxAgeInDays must be between 1 and 365 (' . $maxAgeInDays . ' was given)');
         }
 
         // ip must be set
         if (empty($ip)){
-            throw new \InvalidArgumentException('ip argument must be set (null given)');
+            throw new \InvalidArgumentException('ip argument must be set (empty value given)');
         }
 
         // minimal data
         $data = [
             'ipAddress'     => $ip, 
-            'maxAgeInDays'  => $maxAge,  
+            'maxAgeInDays'  => $maxAgeInDays,  
         ];
 
         // option
@@ -288,9 +234,7 @@ class ApiHandler extends ApiBase
            $data['verbose'] = true;
         }
 
-        $response = $this->apiRequest('check', $data, 'GET') ;
-
-        return json_decode($response, $returnArray);
+        return $this->apiRequest('check', $data, 'GET') ;
     }
 
     /**
@@ -330,57 +274,56 @@ class ApiHandler extends ApiBase
      * 
      * @access public
      * @param string    $network        The network to check
-     * @param int       $maxAge         Max age in days
-     * @param bool      $returnArray    True to return an indexed array instead of object. Default is false. 
+     * @param int       $maxAgeInDays   The Max age in days, must 
      * 
-     * @return object|array
-     * @throws \InvalidArgumentException    when maxAge is less than 1 or greater than 365, or when network value was not set. 
+     * @return ApiResponse
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException    when $maxAgeInDays is less than 1 or greater than 365, or when $network value was not set. 
      */
-    public function checkBlock(string $network = null, int $maxAge = 30, bool $returnArray = false)
+    public function checkBlock(string $network, int $maxAgeInDays = 30): ApiResponse
     {
-        // max age must be less or equal to 365
-        if ($maxAge > 365 || $maxAge < 1){
-            throw new \InvalidArgumentException('maxAge must be at least 1 and less than 365 (' . $maxAge . ' was given)');
+        // max age must be between 1 and 365
+        if ($maxAgeInDays > 365 || $maxAgeInDays < 1){
+            throw new \InvalidArgumentException('maxAgeInDays must be between 1 and 365 (' . $maxAgeInDays . ' was given)');
         }
 
         // ip must be set
         if (empty($network)){
-            throw new \InvalidArgumentException('network argument must be set (null given)');
+            throw new \InvalidArgumentException('network argument must be set (empty value given)');
         }
 
         // minimal data
         $data = [
             'network'       => $network, 
-            'maxAgeInDays'  => $maxAge,  
+            'maxAgeInDays'  => $maxAgeInDays,  
         ];
 
-        $response = $this->apiRequest('check-block', $data, 'GET') ;
-
-        return json_decode($response, $returnArray);
+        return $this->apiRequest('check-block', $data, 'GET');
     }
 
     /**
      * Perform a 'blacklist' api request
      * 
      * @access public
-     * @param int       $limit          The blacklist limit. Default is TODO (the api default limit) 
-     * @param bool      $plainText      True to get the response in plain text list. Default is false
-     * @param bool      $returnArray    True to return an indexed array instead of object (when $plainText is set to false). Default is false. 
+     * @param int       $limit              The blacklist limit. Default is 10000 (the api default limit) 
+     * @param bool      $plainText          True to get the response in plaintext list. Default is false
+     * @param int       $confidenceMinimum  The abuse confidence score minimum (subscribers feature). Default is 100.
+     *                                      The confidence minimum must be between 25 and 100.
+     *                                      This parameter is subscriber feature (not honored otherwise).
      * 
-     * @return object|array|string
-     * @throws \InvalidArgumentException    When maxAge is not a numeric value, when maxAge is less than 1 or 
-     *                                      greater than 365, or when ip value was not set. 
+     * @return ApiResponse
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException    When maxAge is not a numeric value, when $limit is less than 1. 
      */
-    public function getBlacklist(int $limit = 10000, bool $plainText = false, bool $returnArray = false)
+    public function blacklist(int $limit = 10000, bool $plainText = false, int $confidenceMinimum = 100): ApiResponse
     {
-
         if ($limit < 1){
             throw new \InvalidArgumentException('limit must be at least 1 (' . $limit . ' was given)');
         }
 
         // minimal data
         $data = [
-            'confidenceMinimum' => 100, // The abuseConfidenceScore parameter is a subscriber feature. 
+            'confidenceMinimum' => $confidenceMinimum, 
             'limit'             => $limit,
         ];
 
@@ -390,13 +333,7 @@ class ApiHandler extends ApiBase
             $data['plaintext'] = $plainText;
         }
 
-        $response = $this->apiRequest('blacklist', $data, 'GET');
-
-        if ($plainText){
-            return $response;
-        } 
-       
-        return json_decode($response, $returnArray);
+        return $this->apiRequest('blacklist', $data, 'GET');
     }
   
     /**
@@ -406,13 +343,13 @@ class ApiHandler extends ApiBase
      * @param string    $path           The api end path 
      * @param array     $data           The request data 
      * @param string    $method         The request method. Default is 'GET' 
-     * @param bool      $csvFilePath    The file path for csv file. When not empty, $data parameter is ignored and in place,
+     * @param string    $csvFilePath    The file path for csv file. When not empty, $data parameter is ignored and in place,
      *                                  the content of the given file if passed as csv. Default is empty string. 
      * 
-     * @return mixed
+     * @return ApiResponse
      * @throws \RuntimeException
      */
-    protected function apiRequest(string $path, array $data, string $method = 'GET', string $csvFilePath = '') 
+    protected function apiRequest(string $path, array $data, string $method = 'GET', string $csvFilePath = ''): ApiResponse
     {
         // set api url
         $url = $this->aipdbApiEndpoint . $path; 
@@ -438,6 +375,7 @@ class ApiHandler extends ApiBase
         if ($method == 'POST') {
             $this->setCurlOption($ch, CURLOPT_POST, true);
             $this->setCurlOption($ch, CURLOPT_POSTFIELDS, $data);
+        
         } else {
             $this->setCurlOption($ch, CURLOPT_CUSTOMREQUEST, $method);
             $url .= '?' . http_build_query($data);
@@ -454,8 +392,7 @@ class ApiHandler extends ApiBase
         // close connection
         curl_close($ch);
   
-        // return response as is (JSON or plain text)
-        return $result;
+        return new ApiResponse($result !== false ? $result : '');
     }
 
     /** 
@@ -468,7 +405,7 @@ class ApiHandler extends ApiBase
      *  
 	 * @return string
      */
-    protected function cleanMessage(string $message)
+    public function cleanMessage(string $message): string
     {
         // Remove backslashes
         $message = str_replace('\\', '', $message);
@@ -484,39 +421,5 @@ class ApiHandler extends ApiBase
         
         // Make sure message is less 1024 chars
         return substr($message, 0, 1024);
-    }
-
-    /** 
-     * Load and returns decoded Json from given file  
-     *
-     * @access public
-     * @static
-	 * @param string    $filePath       The file's full path
-	 * @param bool      $throwError     Throw error on true or silent process. Default is true
-     *  
-	 * @return object|null 
-     * @throws \Exception
-     * @throws \LogicException
-     */
-    protected static function loadJsonFile(string $filePath, bool $throwError = true)
-    {
-        // check file exists
-        if (!file_exists($filePath) || !is_file($filePath)){
-           if ($throwError) {
-                throw new \Exception('Config file not found');
-           }
-           return null;  
-        }
-
-        // get and parse content
-        $content = utf8_encode(file_get_contents($filePath));
-        $json    = json_decode($content);
-
-        // check for errors
-        if ($json == null && json_last_error() != JSON_ERROR_NONE && $throwError) {
-            throw new \LogicException(sprintf("Failed to parse config file Error: '%s'", json_last_error_msg()));
-        }
-
-        return $json;        
     }
 }

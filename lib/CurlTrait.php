@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  *     _    _                    ___ ____  ____  ____
@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.7
+ * @version    0.9.8
  * @copyright  2020-2021 Kristuff
  */
 
@@ -36,7 +36,8 @@ trait CurlTrait
      * @return void
      * @throws \RuntimeException
      */
-    protected function setCurlOption($ch,int $option,$value){
+    protected function setCurlOption($ch, int $option, $value): void
+    {
         if(!curl_setopt($ch,$option,$value)){
             throw new \RuntimeException('curl_setopt failed! '.curl_error($ch));
         }

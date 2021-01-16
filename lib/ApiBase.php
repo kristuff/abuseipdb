@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  *     _    _                    ___ ____  ____  ____
@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.7
+ * @version    0.9.8
  * @copyright  2020-2021 Kristuff
  */
 
@@ -41,15 +41,7 @@ abstract class ApiBase
      * @var string $aipdbApiKey  
      */
     protected $aipdbApiKey = null; 
-
-    /**
-     * AbuseIPDB user id 
-     * 
-     * @access protected
-     * @var string $aipdbUserId  
-     */
-    protected $aipdbUserId = null; 
-
+  
     /**
      * AbuseIPDB API v2 categories
      * shorname, id (string), long name
@@ -141,7 +133,8 @@ abstract class ApiBase
     /**
      * Get the list of report categories
      * 
-     * @access public 
+     * @access public
+     *  
      * @return array
      */
     public function getCategories()
@@ -193,10 +186,10 @@ abstract class ApiBase
      * Get the index of category corresponding to given value
      * 
      * @access protected
-     * @param string    $value          The report category id or name
-     * @param string    $index          The index in value array 
+     * @param string        $value          The report category id or name
+     * @param string        $index          The index in value array 
      * 
-     * @return int|bool                 The category index if found, otherwise false
+     * @return int|bool     The category index if found, otherwise false
      */
     protected function getCategoryIndex(string $value, int $index)
     {
@@ -217,9 +210,9 @@ abstract class ApiBase
      * Check for shortname or id, and categories that can't be used alone 
      * 
      * @access protected
-     * @param array $categories       The report categories list
+     * @param array         $categories       The report categories list
      *
-     * @return string               Formatted string id list ('18,2,3...')
+     * @return string       Formatted string id list ('18,2,3...')
      * @throws \InvalidArgumentException
      */
     protected function validateReportCategories(string $categories)
@@ -240,7 +233,7 @@ abstract class ApiBase
 
             // check if found
             if ($catIndex === false ){
-                throw new \InvalidArgumentException('Invalid report category was given : ['. $cat .  ']');
+                throw new \InvalidArgumentException('Invalid report category was given.');
             }
 
             // get Id
@@ -265,7 +258,7 @@ abstract class ApiBase
         }
 
         if ($needAnother !== false){
-            throw new \InvalidArgumentException('Invalid report category paremeter given: some categories can\'t be used alone');
+            throw new \InvalidArgumentException('Invalid report category parameter given: this category can\'t be used alone.');
         }
 
         // if here that ok
