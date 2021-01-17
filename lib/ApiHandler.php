@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.8
+ * @version    0.9.9
  * @copyright  2020-2021 Kristuff
  */
 
@@ -31,6 +31,11 @@ class ApiHandler extends ApiBase
      * Curl helper functions
      */
     use CurlTrait;
+
+    /**
+     * @var string      $version
+     */
+    const VERSION = 'v0.9.9'; 
 
     /**
      * The ips to remove from report messages
@@ -214,8 +219,8 @@ class ApiHandler extends ApiBase
     public function check(string $ip, int $maxAgeInDays = 30, bool $verbose = false): ApiResponse
     {
         // max age must be less or equal to 365
-        if ($maxAgeInDays > 365 || $maxAgeInDays < 1){
-            throw new \InvalidArgumentException('maxAgeInDays must be between 1 and 365 (' . $maxAgeInDays . ' was given)');
+        if ( $maxAgeInDays > 365 || $maxAgeInDays < 1 ){
+            throw new \InvalidArgumentException('maxAgeInDays must be between 1 and 365.');
         }
 
         // ip must be set

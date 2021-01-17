@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.8
+ * @version    0.9.9
  * @copyright  2020-2021 Kristuff
  */
 
@@ -34,6 +34,13 @@ class ApiResponse
     protected $curlResponse; 
 
     /**
+     * 
+     * @access protected
+     * @var object 
+     */
+    protected $decodedResponse; 
+
+    /**
      * Constructor
      * 
      * @access public
@@ -43,6 +50,7 @@ class ApiResponse
     public function __construct(?string $plaintext = null)
     {
         $this->curlResponse = $plaintext;
+        $this->decodedResponse = json_decode($plaintext, false);
     }
 
     /**
@@ -66,7 +74,7 @@ class ApiResponse
      */
     public function getObject(): ?object
     {
-        return json_decode($this->curlResponse, false);
+        return $this->decodedResponse;
     }
 
     /**
@@ -79,5 +87,29 @@ class ApiResponse
     public function getPlaintext(): ?string
     {
         return $this->curlResponse;
+    }
+    
+    /**
+     * Get whether the response contains error(s)
+     * 
+     * @access public
+     * 
+     * @return bool
+     */
+    public function hasError(): bool
+    {
+        return count($this->errors()) > 0;
+    }
+
+    /**
+     * Get an array of errors (object) contained is response 
+     * 
+     * @access public
+     * 
+     * @return array
+     */
+    public function errors(): array
+    {
+        return ($this->decodedResponse && $this->decodedResponse->errors) ? $this->decodedResponse->errors : [];
     }
 }
