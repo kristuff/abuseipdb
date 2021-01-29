@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.9
+ * @version    0.9.10
  * @copyright  2020-2021 Kristuff
  */
 
@@ -47,9 +47,10 @@ abstract class ApiBase
      * shorname, id (string), long name
      * last paramter is false when the category cant' be used alone
      * 
+     * @static
      * @var array
      */
-    protected $aipdbApiCategories = [
+    protected static $aipdbApiCategories = [
         
         // Altering DNS records resulting in improper redirection.        
         ['dns-c'           , '1', 'DNS Compromise', true],    
@@ -134,25 +135,27 @@ abstract class ApiBase
      * Get the list of report categories
      * 
      * @access public
+     * @static
      *  
      * @return array
      */
-    public function getCategories()
+    public static function getCategories(): array
     {
-        return $this->aipdbApiCategories;
+        return self::$aipdbApiCategories;
     }
 
     /**
      * Get the category id corresponding to given name
      * 
      * @access public
-     * @param string $categoryName    The report categoriy name
+     * @static
+     * @param string $categoryName    The report category name
      * 
      * @return string|bool            The category id in string format if found, otherwise false
      */
-    public function getCategoryIdbyName(string $categoryName)
+    public static function getCategoryIdbyName(string $categoryName)
     {
-        foreach ($this->aipdbApiCategories as $cat){
+        foreach (self::$aipdbApiCategories as $cat){
             if ($cat[0] === $categoryName) {
                 return $cat;
             }
@@ -166,13 +169,14 @@ abstract class ApiBase
      * Get the category name corresponding to given id
      * 
      * @access public
+     * @static
      * @param string    $categoryId   The report category id
      * 
      * @return string|bool            The category name if found, otherwise false
      */
-    public function getCategoryNameById(string $categoryId)
+    public static function getCategoryNameById(string $categoryId)
     {
-        foreach ($this->aipdbApiCategories as $cat){
+        foreach (self::$aipdbApiCategories as $cat){
            if ($cat[1] === $categoryId) {
                return $cat;
            }
@@ -186,15 +190,16 @@ abstract class ApiBase
      * Get the index of category corresponding to given value
      * 
      * @access protected
+     * @static
      * @param string        $value          The report category id or name
      * @param string        $index          The index in value array 
      * 
      * @return int|bool     The category index if found, otherwise false
      */
-    protected function getCategoryIndex(string $value, int $index)
+    protected static function getCategoryIndex(string $value, int $index)
     {
         $i = 0;
-        foreach ($this->aipdbApiCategories as $cat){
+        foreach (self::$aipdbApiCategories as $cat){
             if ($cat[$index] === $value) {
                 return $i;
             }
@@ -229,7 +234,7 @@ abstract class ApiBase
         foreach ($cats as $cat) {
 
             // get index on our array of categories
-            $catIndex    = is_numeric($cat) ? $this->getCategoryIndex($cat, 1) : $this->getCategoryIndex($cat, 0);
+            $catIndex    = is_numeric($cat) ? self::getCategoryIndex($cat, 1) : self::getCategoryIndex($cat, 0);
 
             // check if found
             if ($catIndex === false ){
@@ -237,13 +242,13 @@ abstract class ApiBase
             }
 
             // get Id
-            $catId = $this->aipdbApiCategories[$catIndex][1];
+            $catId = self::$aipdbApiCategories[$catIndex][1];
 
             // need another ?
             if ($needAnother !== false){
 
                 // is a standalone cat ?
-                if ($this->aipdbApiCategories[$catIndex][3] === false) {
+                if (self::$aipdbApiCategories[$catIndex][3] === false) {
                     $needAnother = true;
 
                 } else {

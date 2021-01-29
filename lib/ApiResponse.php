@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.9
+ * @version    0.9.10
  * @copyright  2020-2021 Kristuff
  */
 
@@ -50,7 +50,7 @@ class ApiResponse
     public function __construct(?string $plaintext = null)
     {
         $this->curlResponse = $plaintext;
-        $this->decodedResponse = json_decode($plaintext, false);
+        $this->decodedResponse = !empty($plaintext) ? json_decode($plaintext, false) : null;
     }
 
     /**
@@ -111,5 +111,28 @@ class ApiResponse
     public function errors(): array
     {
         return ($this->decodedResponse && $this->decodedResponse->errors) ? $this->decodedResponse->errors : [];
+    }
+
+    /**
+     * Get an internal error message in an ApiResponse object
+     * 
+     * @access public
+     * @static
+     * @param string    $message        The error message
+     *
+     * @return ApiResponse
+     */
+    public static function createErrorResponse(string $message): ApiResponse
+    {
+        $response = [
+            "errors" => [
+                [
+                    "title"  => "Internal Error",
+                    "detail" => $message
+                ]
+            ]
+        ];
+
+        return new ApiResponse(json_encode($response));
     }
 }

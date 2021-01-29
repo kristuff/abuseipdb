@@ -2,6 +2,7 @@
     "name": "kristuff/abuseipdb",
     "description": "A PHP wrapper for AbuseIPDB API v2",
     "type": "library",
+    "keywords": ["abuseIPDB", "API"],
     "license": "MIT",
     "authors": [
         {

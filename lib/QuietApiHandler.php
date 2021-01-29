@@ -14,43 +14,21 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.9
+ * @version    0.9.10
  * @copyright  2020-2021 Kristuff
  */
 
 namespace Kristuff\AbuseIPDB;
 
 /**
- * Class SilentApiHandler
+ * Class QuietApiHandler
  * 
  * Overwrite ApiHandler with Exception handling
- * Instead of Exception, all method return an ApiResponse that may 
+ * Instead of Exception, all methods return an ApiResponse that may 
  * contains errors from the AbuseIPDB API, or internal errors  
  */
-class SilentApiHandler extends ApiHandler
+class QuietApiHandler extends ApiHandler
 {
-    /**
-     * Get an internal error message in an ApiResponse object
-     * 
-     * @access public
-     * @param string    $message        The error message
-     *
-     * @return ApiResponse
-     */
-    public function getErrorResponse(string $message): ApiResponse
-    {
-        $response = [
-            "errors" => [
-                [
-                    "title"  => "Internal Error",
-                    "detail" => $message
-                ]
-            ]
-        ];
-
-        return new ApiResponse(json_encode($response));
-    }
-
     /**
      * Performs a 'report' api request, with Exception handling
      * 
@@ -66,7 +44,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::report($ip,$categories,$message);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 
@@ -83,7 +61,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::bulkReport($filePath);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 
@@ -100,7 +78,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::clearAddress($ip);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 
@@ -119,7 +97,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::check($ip, $maxAgeInDays, $verbose);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 
@@ -137,7 +115,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::checkBlock($network, $maxAgeInDays);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 
@@ -149,7 +127,7 @@ class SilentApiHandler extends ApiHandler
      * @param bool      $plainText          True to get the response in plaintext list. Default is false
      * @param int       $confidenceMinimum  The abuse confidence score minimum (subscribers feature). Default is 100.
      *                                      The confidence minimum must be between 25 and 100.
-     *                                      This parameter is subscriber feature (not honored otherwise).
+     *                                      This parameter is a subscriber feature (not honored otherwise).
      * 
      * @return ApiResponse
      */
@@ -158,7 +136,7 @@ class SilentApiHandler extends ApiHandler
         try {
             return parent::blacklist($limit, $plainText, $confidenceMinimum);
         } catch (\Exception $e) {
-            return $this->getErrorResponse($e->getMessage());
+            return ApiResponse::createErrorResponse($e->getMessage());
         }
     }
 }

@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.9
+ * @version    0.9.10
  * @copyright  2020-2021 Kristuff
  */
 
@@ -33,9 +33,9 @@ class ApiHandler extends ApiBase
     use CurlTrait;
 
     /**
-     * @var string      $version
+     * @var string
      */
-    const VERSION = 'v0.9.9'; 
+    const VERSION = 'v0.9.10'; 
 
     /**
      * The ips to remove from report messages
@@ -314,7 +314,7 @@ class ApiHandler extends ApiBase
      * @param bool      $plainText          True to get the response in plaintext list. Default is false
      * @param int       $confidenceMinimum  The abuse confidence score minimum (subscribers feature). Default is 100.
      *                                      The confidence minimum must be between 25 and 100.
-     *                                      This parameter is subscriber feature (not honored otherwise).
+     *                                      This parameter is a subscriber feature (not honored otherwise).
      * 
      * @return ApiResponse
      * @throws \RuntimeException
