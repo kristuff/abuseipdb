@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.10
+ * @version    0.9.11
  * @copyright  2020-2021 Kristuff
  */
 
@@ -35,7 +35,7 @@ class ApiHandler extends ApiBase
     /**
      * @var string
      */
-    const VERSION = 'v0.9.10'; 
+    const VERSION = 'v0.9.11'; 
 
     /**
      * The ips to remove from report messages

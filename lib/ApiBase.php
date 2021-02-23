@@ -14,7 +14,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.10
+ * @version    0.9.11
  * @copyright  2020-2021 Kristuff
  */
 
@@ -128,7 +128,7 @@ abstract class ApiBase
 
         // Abuse was targeted at an "Internet of Things" type device. Include 
         // information about what type of device was targeted in the comments.         
-        ['oit'             , '23', 'IoT Targeted', true],     
+        ['iot'             , '23', 'IoT Targeted', true],     
     ];
 
     /**
@@ -153,11 +153,11 @@ abstract class ApiBase
      * 
      * @return string|bool            The category id in string format if found, otherwise false
      */
-    public static function getCategoryIdbyName(string $categoryName)
+    public static function getCategoryIdByName(string $categoryName)
     {
         foreach (self::$aipdbApiCategories as $cat){
             if ($cat[0] === $categoryName) {
-                return $cat;
+                return $cat[1];
             }
          }
 
@@ -178,7 +178,7 @@ abstract class ApiBase
     {
         foreach (self::$aipdbApiCategories as $cat){
            if ($cat[1] === $categoryId) {
-               return $cat;
+               return $cat[0];
            }
         }
 
