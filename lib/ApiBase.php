@@ -7,14 +7,14 @@
  *  / ___ \| |_) | |_| \__ \  __/| ||  __/| |_| | |_) |
  * /_/   \_\_.__/ \__,_|___/\___|___|_|   |____/|____/
  *
- * This file is part of Kristuff\AbsuseIPDB.
+ * This file is part of Kristuff\AbuseIPDB.
  *
- * (c) Kristuff <contact@kristuff.fr>
+ * (c) Kristuff <kristuff@kristuff.fr>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.11
+ * @version    0.9.12
  * @copyright  2020-2021 Kristuff
  */
 
@@ -44,8 +44,8 @@ abstract class ApiBase
   
     /**
      * AbuseIPDB API v2 categories
-     * shorname, id (string), long name
-     * last paramter is false when the category cant' be used alone
+     * shortname, id (string), long name
+     * last parameter is false when the category can't be used alone
      * 
      * @static
      * @var array

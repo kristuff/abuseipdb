@@ -32,7 +32,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": ">=0.9.11-stable"
+    "kristuff/abuseipdb": "^0.9.12-stable"
 },
 ```
 
@@ -41,8 +41,7 @@ More infos
 
 - [Project website](https://kristuff.fr/projects/abuseipdb)
 - [Api documentation](https://kristuff.fr/projects/abuseipdb/doc)
-- [Config/Install guide](https://kristuff.fr/projects/abuseipdb/technical#configuration)
-- [CLI version](https://kristuff.fr/projects/abuseipdbcli)
+- CLI version: [github](https://github.com/kristuff/abuseipdb-cli) | [website](https://kristuff.fr/projects/abuseipdbcli)
 
 
 License
