@@ -110,7 +110,7 @@ class ApiResponse
      */
     public function errors(): array
     {
-        return ($this->decodedResponse && $this->decodedResponse->errors) ? $this->decodedResponse->errors : [];
+        return ($this->decodedResponse && property_exists($this->decodedResponse, 'errors')) ? $this->decodedResponse->errors : [];
     }
 
     /**
