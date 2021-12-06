@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
 
 /**
- *     _    _                    ___ ____  ____  ____
- *    / \  | |__  _   _ ___  ___|_ _|  _ \|  _ \| __ )
- *   / _ \ | '_ \| | | / __|/ _ \| || |_) | | | |  _ \
- *  / ___ \| |_) | |_| \__ \  __/| ||  __/| |_| | |_) |
- * /_/   \_\_.__/ \__,_|___/\___|___|_|   |____/|____/
- *
+ *       _                 ___ ___ ___  ___
+ *  __ _| |__ _  _ ___ ___|_ _| _ \   \| _ )
+ * / _` | '_ \ || (_-</ -_)| ||  _/ |) | _ \
+ * \__,_|_.__/\_,_/__/\___|___|_| |___/|___/
+ * 
  * This file is part of Kristuff\AbuseIPDB.
  *
  * (c) Kristuff <kristuff@kristuff.fr>
@@ -14,7 +13,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.13
+ * @version    0.9.14
  * @copyright  2020-2021 Kristuff
  */
 
@@ -35,7 +34,7 @@ class ApiHandler extends ApiBase
     /**
      * @var string
      */
-    const VERSION = 'v0.9.13'; 
+    const VERSION = 'v0.9.14'; 
 
     /**
      * The ips to remove from report messages
@@ -47,17 +46,30 @@ class ApiHandler extends ApiBase
     protected $selfIps = []; 
 
     /**
+     * The maximum number of milliseconds to allow cURL functions to execute. If libcurl is 
+     * built to use the standard system name resolver, that portion of the connect will still 
+     * use full-second resolution for timeouts with a minimum timeout allowed of one second. 
+     * 
+     * @access protected
+     * @var int  
+     */
+    protected $timeout = 0; 
+
+    /**
      * Constructor
      * 
      * @access public
      * @param string  $apiKey     The AbuseIPDB api key
      * @param array   $myIps      The Ips/domain name you don't want to display in report messages
+     * @param int     $timeout    The maximum number of milliseconds to allow internal cURL functions 
+     *                            to execute. Default is 0, no timeout
      * 
      */
-    public function __construct(string $apiKey, array $myIps = [])
+    public function __construct(string $apiKey, array $myIps = [], int $timeout = 0)
     {
         $this->aipdbApiKey = $apiKey;
         $this->selfIps = $myIps;
+        $this->timeout = $timeout;
     }
 
     /**
@@ -72,6 +84,7 @@ class ApiHandler extends ApiBase
         return array(
             'apiKey'  => $this->aipdbApiKey,
             'selfIps' => $this->selfIps,
+            'timeout' => $this->timeout, 
         );
     }
 
@@ -160,6 +173,7 @@ class ApiHandler extends ApiBase
      * @return ApiResponse
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws InvalidPermissionException
      */
     public function bulkReport(string $filePath): ApiResponse
     {
@@ -356,9 +370,10 @@ class ApiHandler extends ApiBase
      */
     protected function apiRequest(string $path, array $data, string $method = 'GET', string $csvFilePath = ''): ApiResponse
     {
-        // set api url
-        $url = $this->aipdbApiEndpoint . $path; 
-
+        $curlErrorNumber = -1;                   // will be used later to check curl execution
+        $curlErrorMessage = '';
+        $url = $this->aipdbApiEndpoint . $path;  // api url
+        
         // set the wanted format, JSON (required to prevent having full html page on error)
         // and the AbuseIPDB API Key as a header
         $headers = [
@@ -386,17 +401,35 @@ class ApiHandler extends ApiBase
             $url .= '?' . http_build_query($data);
         }
 
-        // set the url to call
+        // set url and options
         $this->setCurlOption($ch, CURLOPT_URL, $url);
         $this->setCurlOption($ch, CURLOPT_RETURNTRANSFER, 1); 
         $this->setCurlOption($ch, CURLOPT_HTTPHEADER, $headers);
-    
+        
+        /**
+         * set timeout  
+         * 
+         * @see https://curl.se/libcurl/c/CURLOPT_TIMEOUT_MS.html
+         * @see https://curl.se/libcurl/c/CURLOPT_CONNECTTIMEOUT_MS.html
+         *  If libcurl is built to use the standard system name resolver, that portion of the transfer 
+         *  will still use full-second resolution for timeouts with a minimum timeout allowed of one second. 
+         *  In unix-like systems, this might cause signals to be used unless CURLOPT_NOSIGNAL is set. 
+         */
+        $this->setCurlOption($ch, CURLOPT_NOSIGNAL, 1);
+        $this->setCurlOption($ch, CURLOPT_TIMEOUT_MS, $this->timeout);
+
         // execute curl call
         $result = curl_exec($ch);
-    
+        $curlErrorNumber = curl_errno($ch);
+        $curlErrorMessage = curl_error($ch);
+
         // close connection
         curl_close($ch);
-  
+
+        if ($curlErrorNumber !== 0){
+            throw new \RuntimeException($curlErrorMessage);
+        }
+
         return new ApiResponse($result !== false ? $result : '');
     }
 
