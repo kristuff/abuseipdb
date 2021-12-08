@@ -16,7 +16,8 @@ Features
 - Single IP report request **✓** 
 - Bulk report request (send `csv` file) **✓** 
 - Clear IP address request (remove your own reports) **✓**
-- Auto cleaning report comments from sensitive data (email, custom ip/domain names list)  **✓** 
+- Auto cleaning report comments from sensitive data (email, custom ip/domain names list) **✓** 
+- Define timeout for cURL internal requests **✓**
 
 Requirements
 ------------    
@@ -32,7 +33,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": "^0.9.14-stable"
+    "kristuff/abuseipdb": "^0.9.15-stable"
 },
 ```
 

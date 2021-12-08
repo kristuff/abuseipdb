@@ -13,7 +13,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.14
+ * @version    0.9.15
  * @copyright  2020-2021 Kristuff
  */
 
@@ -34,7 +34,7 @@ class ApiHandler extends ApiBase
     /**
      * @var string
      */
-    const VERSION = 'v0.9.14'; 
+    const VERSION = 'v0.9.15'; 
 
     /**
      * The ips to remove from report messages
@@ -69,6 +69,21 @@ class ApiHandler extends ApiBase
     {
         $this->aipdbApiKey = $apiKey;
         $this->selfIps = $myIps;
+        $this->timeout = $timeout;
+    }
+
+    /**
+     * Sets the cURL timeout (apply then to any API request). Overwrites the value passed in 
+     * constructor, useful when performing multiple queries with same handler but different timeout.
+     * 
+     * @access public
+     * @param int     $timeout    The maximum number of milliseconds to allow internal cURL functions 
+     *                            to execute.
+     * 
+     * @return void
+     */
+    public function setTimeout(int $timeout): void
+    {
         $this->timeout = $timeout;
     }
 
