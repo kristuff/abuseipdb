@@ -13,8 +13,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @version    0.9.15
- * @copyright  2020-2021 Kristuff
+ * @version    1.0
+ * @copyright  2020-2022 Kristuff
  */
 
 namespace Kristuff\AbuseIPDB;
@@ -34,7 +34,7 @@ class ApiHandler extends ApiBase
     /**
      * @var string
      */
-    const VERSION = 'v0.9.15'; 
+    const VERSION = 'v1.0'; 
 
     /**
      * The ips to remove from report messages

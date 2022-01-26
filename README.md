@@ -33,7 +33,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": "^0.9.15-stable"
+    "kristuff/abuseipdb": "^1.0-stable"
 },
 ```
 
@@ -50,7 +50,7 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2020-2021 Kristuff
+Copyright (c) 2020-2022 Kristuff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
