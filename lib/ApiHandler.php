@@ -469,8 +469,8 @@ class ApiHandler extends ApiBase
         }
 
         // If we're reporting spam, further munge any email addresses in the report
-        $emailPattern = "/[^@\s]*@[^@\s]*\.[^@\s]*/";
-        $message = preg_replace($emailPattern, "*", $message);
+        $emailPattern   = "/\b[A-Z0-9!#$%&'*`\/?^{|}~=+_.-]+@[A-Z0-9.-]+\b/i";
+        $message        = preg_replace($emailPattern, "*", $message);
         
         // Make sure message is less 1024 chars
         return substr($message, 0, 1024);
