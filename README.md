@@ -33,7 +33,7 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": "^1.0-stable"
+    "kristuff/abuseipdb": "^1.1-stable"
 },
 ```
 
