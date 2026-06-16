@@ -28,7 +28,7 @@ trait CurlTrait
      * helper to configure cURL option
      *  
      * @access protected
-     * @param resource  $ch
+     * @param resource|\CurlHandle  $ch
      * @param int       $option
      * @param mixed     $value
      *   
