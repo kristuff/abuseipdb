@@ -438,8 +438,10 @@ class ApiHandler extends ApiBase
         $curlErrorNumber = curl_errno($ch);
         $curlErrorMessage = curl_error($ch);
 
-        // close connection
-        curl_close($ch);
+        if (PHP_VERSION_ID < 80000) {
+			// close connection
+			curl_close($ch);
+		}
 
         if ($curlErrorNumber !== 0){
             throw new \RuntimeException($curlErrorMessage);
