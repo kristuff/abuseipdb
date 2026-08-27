@@ -33,24 +33,23 @@ Deploy with composer:
 ```json
 ...
 "require": {
-    "kristuff/abuseipdb": "^1.1-stable"
+    "kristuff/abuseipdb": "^1.2-stable"
 },
 ```
 
 More infos
 -----
 
-- [Project website](https://kristuff.fr/projects/abuseipdb)
-- [Api documentation](https://kristuff.fr/projects/abuseipdb/doc)
-- CLI version: [github](https://github.com/kristuff/abuseipdb-cli) | [website](https://kristuff.fr/projects/abuseipdbcli)
-
+- [Api documentation](/doc.md)
+- CLI version: [github](https://github.com/kristuff/abuseipdb-cli)
+  
 
 License
 -------
 
 The MIT License (MIT)
 
-Copyright (c) 2020-2022 Kristuff
+Copyright (c) 2020-2026 Kristuff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
