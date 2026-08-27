@@ -1,8 +1,8 @@
 # Kristuff/AbuseIPDB | Documentation
 
-## 1 Overview {#overview}
+## 1 Overview
 
-### 1.1 Create an ApiHandler {#apihandler}
+### 1.1 Create an ApiHandler 
 
 The `ApiHandler` class contains all methods to work with the API. 
 
@@ -66,11 +66,11 @@ $api->report( ... );
 ...
 ```
 
-### 1.2. ApiHandler response {#apiresponse}
+### 1.2. ApiHandler response 
 
 All query API methods return an `ApiResponse` object you can use to get the response in desired format.
 
-### 1.2.1 ApiResponse methods {#apiresponse_methods}
+### 1.2.1 ApiResponse methods 
 
 Methods | Description
 ---     | ---
@@ -80,7 +80,7 @@ Methods | Description
 `ApiResponse::hasError()`       | Gets whether the decoded response contains errors or not (`bool`).
 `ApiResponse::errors()`         | Gets the errors contained in decoded response (`array`). May be empty. 
 
-### 1.2.2 ApiResponse usage {#apiresponse_usage}
+### 1.2.2 ApiResponse usage 
 
 ```.php
 use Kristuff\AbuseIPDB\ApiHandler;
@@ -97,7 +97,7 @@ $array     = $response->getArray();    // get the response as decoded array
 // echo $array['data'][...];
 ```
 
-### 1.3 Error handling {#error_handling}
+### 1.3 Error handling 
 
 AbuseIPDB API response (usually a **json** `string`) may contains error(s) (invalid parameter, too many requests, ...). The structure conforms to the [JSON API spec](https://jsonapi.org/format/#errors):
 
@@ -129,7 +129,7 @@ Those internal errors include the `title` and `detail` members:
 }
 ```
 
-#### 1.3.1 Example with ApiHandler {#apihandler_error}
+#### 1.3.1 Example with ApiHandler 
 
 The following example shows how to handle `\Exception` and errors in `ApiResponse` when performing a query with `ApiHandler` class:
 
@@ -156,7 +156,7 @@ try {
 }
 ```
 
-#### 1.3.2 Example with QuietApiHandler {#quietapihandler_error}
+#### 1.3.2 Example with QuietApiHandler 
 
 The following example shows how to handle errors in `ApiResponse` when performing a query with `QuietApiHandler` class:
 
@@ -179,7 +179,7 @@ $response   = $query->getObject();
 ```
 
 
-### 1.4. Report categories {#categories}
+### 1.4. Report categories 
 
 For [`ApiHandler::report()`](#report) and [`ApiHandler::bulkReport()`](#bulkreport) methods, you must define one or more report **category**. Some categories, for example ***ssh*** (22), cannot be used alone. 
 
@@ -218,15 +218,15 @@ ShortName        | Id    | Full name          | Can be alone?
 See also: [How to get categories list](#categories_list).
 
 
-## 2. How to {#howto}
+## 2. How to 
 
 >  As said on [abuseipdb](https://www.abuseipdb.com/check/127.0.0.1), ip `127.0.0.1` is a private IP address you can use for check/report api testing. Make sure you **do not** blacklist an internal IP on your server, otherwise you won't have a good day! 
 
-### 2.1 Check a single IP address {#check}
+### 2.1 Check a single IP address 
 
 You can check a single IP address using the `ApiHandler::check()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
 
-#### 2.1.1 Check() Overview {#check_overview}
+#### 2.1.1 Check() Overview 
 
 ```.php
 ApiHandler::check(string $ip, int $maxAge = 30, bool $verbose = false): ApiResponse
@@ -242,7 +242,7 @@ Response does not include last reports and country name by default (number or re
 
 `ApiHandler::check()` method may raises `RuntimeException` or `InvalidArgumentException` when `$maxAgeInDays` is not a numeric value, when `$maxAgeInDays` is less than 1 or greater than 365, or when `$ip` value is not set or empty.
 
-#### 2.1.2 Check() Usage {#check_usage}
+#### 2.1.2 Check() Usage 
 
 Check the ip `127.0.0.1` (default is on last 30 days): 
 
@@ -362,12 +362,12 @@ $response = $api->checkIP("127.0.0.1", 1, true);
 
 
 
-### 2.2 Check an IP block {#checkblock}
+### 2.2 Check an IP block 
 
 You can check an IP block address using the `ApiHandlder::checkBlock()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)). 
 
 
-#### 2.1.1 CheckBlock() Overview {#checkblock_overview}
+#### 2.1.1 CheckBlock() Overview 
 
 ```.php
 checkBlock(string $network, int $maxAge = 30): ApiResponse
@@ -380,7 +380,7 @@ By default, the last reports are checked on last **30** days, you can increase t
 `ApiHandler::checkBlock()` method may raises `RuntimeException` or `InvalidArgumentException` when `$maxAgeInDays` is not a numeric value, when `$maxAgeInDays` is less than 1 or greater than 365, or when `$network` value was not set.
 
 
-#### 2.2.2 CheckBlock Limits {#checkblock_limits}
+#### 2.2.2 CheckBlock Limits 
 
 Due to the depth & breath of the these searches, the range of the parameters is capped by plan tier.
 
@@ -394,7 +394,7 @@ maxAgeInDays    |   Up to 30 	| Up to 60 	            |   Up to 365
 > Exceeding a parameter limit will raise an error (402 Payment Required).
 
 
-#### 2.2.3 CheckBlock Usage {#checkblock_usage}
+#### 2.2.3 CheckBlock Usage 
  
 Check the block ip `127.0.0.1/24` (default is on last 30 days): 
 
@@ -450,11 +450,11 @@ $response = $api->checkBlock("127.0.0.1/24", 15);
 
 
 
-### 2.3 Report a single IP address {#report}
+### 2.3 Report a single IP address 
 
 You can reports a specific IP address using the `ApiHandler::report()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
 
-#### 2.3.1 Report Overview {#report_overview}
+#### 2.3.1 Report Overview 
 
 ```.php
 ApiHandler::report(string $ip, string $categories, string $message): ApiResponse
@@ -468,7 +468,7 @@ You must also set :
 - a **message** (`string`).
 
 
-#### 2.3.2 Reports Usage {#report_usage}
+#### 2.3.2 Reports Usage
 
 Report the ip `127.0.0.1` for `ssh` (22) and `brute` (18) with message `ssh brute force attack` using categories **shortname** or **id**: 
 
@@ -516,7 +516,7 @@ try {
 </details>
 
 
-### 2.4 Bulk report IP addresses {#bulkreport}
+### 2.4 Bulk report IP addresses 
 
 Instead of reporting IPs individually, you may compile a CSV of reports. This helps reduce bandwidth on both sides. 
 
@@ -525,7 +525,7 @@ Instead of reporting IPs individually, you may compile a CSV of reports. This he
 You can report many IP by sending a csv file using the `ApiHandler::bulkReport()`method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
 
 
-#### 2.4.1 BulkReport() Overview {#bulkreport_overview}
+#### 2.4.1 BulkReport() Overview 
 
 ```.php
 ApiHandler::bulkReport(string $filePath): ApiResponse
@@ -533,8 +533,8 @@ ApiHandler::bulkReport(string $filePath): ApiResponse
 
 This commands takes the file name/path as unique parameter. The CSV file must be under **2 MB** and less than or equal to **10,000 lines**, including the headings (see [CSV Format](#bulkreport_csv)).
 
-#### 2.4.2 CSV Format {#bulkreport_csv}
-    
+#### 2.4.2 CSV Format 
+
 > Headings ***required***, any order.
 
 - `IP` — A valid IPv4 or IPv6 IP address.
@@ -555,7 +555,7 @@ in sorbs:'listed [web], [spam]'
 in Unsubscore:'listed'
 *(RWIN=8192)(04:10)"
 ```
-#### 2.4.3 BulkReport() Usage {#bulkreport_usage}
+#### 2.4.3 BulkReport() Usage 
 
 Suppose the csv file named `reports.csv`, located in the current directory, with the following content:
 
@@ -611,12 +611,12 @@ echo $response->getObject();
 </details>
 
 
-### 2.5 Remove own reports for an IP address {#clear}
+### 2.5 Remove own reports for an IP address 
 
 You can delete reports for a specific address from **YOUR** account using the `ApiHandler::clearAddress()` method. It cannot delete another user's reports. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
 
 
-#### 2.5.1 ClearAddress() Overview {#clear_overview}
+#### 2.5.1 ClearAddress() Overview 
 
 ```.php
 ApiHandler::clear(string $ip): ApiResponse
@@ -655,7 +655,7 @@ echo $response->getPlaintext();
 </details>
 
 
-### 2.6 Download IP blacklist  {#blacklist}
+### 2.6 Download IP blacklist  
 
 You can download a blacklist using the `ApiHandler::getBlacklist()` method. 
 
@@ -675,7 +675,7 @@ Premium Subscription    |   1
 ApiHandler::getBlacklist(int $limit = 10000, bool $plainText = false, int $confidenceMinimum = 100): ApiResponse
 ```
 
-#### 2.6.2 Blacklist Limit {#blacklist_limit}
+#### 2.6.2 Blacklist Limit 
 
 To conserve bandwidth, the number of IP addresses included in the list is capped to **10,000**. Subscribers, both basic and premium, can overcome this limit. All users can set it between **1** and **10,000** using the limit parameter.
 
@@ -684,7 +684,7 @@ To conserve bandwidth, the number of IP addresses included in the list is capped
 The **default** limit currently defined is **10,000**, you can change limit in your query with `$limit` parameter.
 
 
-#### 2.6.3 Plaintext Blacklist {#blacklist_plaintext}
+#### 2.6.3 Plaintext Blacklist
 
 You can print the blacklist like any reports or just want to receive the IP list in **plain text** like this:
 
@@ -700,13 +700,13 @@ You can print the blacklist like any reports or just want to receive the IP list
 
 If you prefer a simple newline-separated plaintext response, set the `$plaintext` parameter to `true`.
 
-#### 2.6.4 Confidence Score {#blacklist_score}
+#### 2.6.4 Confidence Score 
 
 The **default** confidence score is **100**, you can change mimimum condidence score in your command with `$confidenceMinimum` parameter. Score must be between **25** to **100**. The `score` is a subscriber feature and is not honored otherwise.
 
 > **The abuseConfidenceScore parameter is a subscriber feature**. This is because custom blacklists take more juice to generate on-demand. Should your subscriber status lapse, an error response will not be thrown. Rather, the response will degrade gracefully to the simple blacklist. This works nicely with existing firewall software. 
 
-#### 2.6.5 Blacklist() Usage {#blacklist_usage}
+#### 2.6.5 Blacklist() Usage 
 
 Get a blacklist of 10 items (decoded `object`):
 
@@ -775,11 +775,11 @@ echo $response->getPlaintext();
 
 ## 3 Misc {#misc}
 
-### 3.1 Get report categories list {#categories_list}
+### 3.1 Get report categories list
 
 You can can get the report categories list using `ApiHandler::getCategories()` method. It returns an array. Each array entry is an array containing shortname, id, long name. Last parameter, `bool` value, is false when the category cant't be use alone.  
 
-### 3.2 Clean a single message {#clean_message}
+### 3.2 Clean a single message 
 
 When reporting IP address, you must send a message that describe the attack. The message can be hard coded or coming from logs. In that case, it could contain sensitive data like own IP address, own domain names or email address. 
 
