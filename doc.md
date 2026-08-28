@@ -20,7 +20,7 @@ $api = new ApiHandler("API_KEY");
 
 **$selfIps**
 
-If you plan to automate reports with **fail2ban** and send logs lines as message (***matches***), it's recommended to configure a ***whitelist*** of IPs and names (domain name) you want to exclude from message. When you use the [`ApiHandler::report()`](#report) method, comments are checked and fields that match to an entry in the list are replaced by **\***. Note that email addresses are already replaced.
+If you plan to automate reports with **fail2ban** and send logs lines as message (***matches***), it's recommended to configure a ***whitelist*** of IPs and names (domain name) you want to exclude from message. When you use the [`ApiHandler::report()`](#23-report-a-single-ip-address) method, comments are checked and fields that match to an entry in the list are replaced by **\***. Note that email addresses are already replaced.
 
 To use a whitelist, create an `ApiHandler` instance with your **api key** and a **whitelist** as parameters like this:
 
@@ -181,11 +181,11 @@ $response   = $query->getObject();
 
 ### 1.4. Report categories 
 
-For [`ApiHandler::report()`](#report) and [`ApiHandler::bulkReport()`](#bulkreport) methods, you must define one or more report **category**. Some categories, for example ***ssh*** (22), cannot be used alone. 
+For [`ApiHandler::report()`](#23-report-a-single-ip-address) and [`ApiHandler::bulkReport()`](#24-bulk-report-ip-addresses) methods, you must define one or more report **category**. Some categories, for example ***ssh*** (22), cannot be used alone. 
 
-With [`ApiHandler::report()`](#report) method, a category can be represented by its **shortname** or by its **id**. Using category shortname is an internal feature of [ApiHandler::report()](#report) method. When you use the [`ApiHandler::bulkReport()`](#bulkreport) method, you **must** use the **id**.
+With [`ApiHandler::report()`](#23-report-a-single-ip-address) method, a category can be represented by its **shortname** or by its **id**. Using category shortname is an internal feature of [ApiHandler::report()](#23-report-a-single-ip-address) method. When you use the [`ApiHandler::bulkReport()`](#24-bulk-report-ip-addresses) method, you **must** use the **id**.
 
-***Categories list*** must be a comma separated list string. When using [`ApiHandler::bulkReport()`](#bulkreport) method, categories list **requires** double quotes to include commas ("18,22").
+***Categories list*** must be a comma separated list string. When using [`ApiHandler::bulkReport()`](#24-bulk-report-ip-addresses) method, categories list **requires** double quotes to include commas ("18,22").
 
 Here is the full ***Categories list***:
 
@@ -224,7 +224,7 @@ See also: [How to get categories list](#categories_list).
 
 ### 2.1 Check a single IP address 
 
-You can check a single IP address using the `ApiHandler::check()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
+You can check a single IP address using the `ApiHandler::check()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#12-apihandler-response)).
 
 #### 2.1.1 Check() Overview 
 
@@ -364,7 +364,7 @@ $response = $api->checkIP("127.0.0.1", 1, true);
 
 ### 2.2 Check an IP block 
 
-You can check an IP block address using the `ApiHandlder::checkBlock()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)). 
+You can check an IP block address using the `ApiHandlder::checkBlock()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#12-apihandler-response)). 
 
 
 #### 2.1.1 CheckBlock() Overview 
@@ -452,7 +452,7 @@ $response = $api->checkBlock("127.0.0.1/24", 15);
 
 ### 2.3 Report a single IP address 
 
-You can reports a specific IP address using the `ApiHandler::report()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
+You can reports a specific IP address using the `ApiHandler::report()` method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#12-apihandler-response)).
 
 #### 2.3.1 Report Overview 
 
@@ -522,7 +522,7 @@ Instead of reporting IPs individually, you may compile a CSV of reports. This he
 
 > Note: The abuse confidence score of a IP reported this way is not immediately calculated.
 
-You can report many IP by sending a csv file using the `ApiHandler::bulkReport()`method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
+You can report many IP by sending a csv file using the `ApiHandler::bulkReport()`method. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#12-apihandler-response)).
 
 
 #### 2.4.1 BulkReport() Overview 
@@ -531,7 +531,7 @@ You can report many IP by sending a csv file using the `ApiHandler::bulkReport()
 ApiHandler::bulkReport(string $filePath): ApiResponse
 ```
 
-This commands takes the file name/path as unique parameter. The CSV file must be under **2 MB** and less than or equal to **10,000 lines**, including the headings (see [CSV Format](#bulkreport_csv)).
+This commands takes the file name/path as unique parameter. The CSV file must be under **2 MB** and less than or equal to **10,000 lines**, including the headings (see [CSV Format](#24-bulk-report-ip-addresses_csv)).
 
 #### 2.4.2 CSV Format 
 
@@ -613,7 +613,7 @@ echo $response->getObject();
 
 ### 2.5 Remove own reports for an IP address 
 
-You can delete reports for a specific address from **YOUR** account using the `ApiHandler::clearAddress()` method. It cannot delete another user's reports. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#apiresponse)).
+You can delete reports for a specific address from **YOUR** account using the `ApiHandler::clearAddress()` method. It cannot delete another user's reports. This method returns an  `ApiResponse` object you can use to get the response in the desired format (See [ApiHandler response](#12-apihandler-response)).
 
 
 #### 2.5.1 ClearAddress() Overview 
