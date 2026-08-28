@@ -773,7 +773,7 @@ echo $response->getPlaintext();
 </details>
 
 
-## 3 Misc {#misc}
+## 3 Misc
 
 ### 3.1 Get report categories list
 
@@ -786,7 +786,7 @@ When reporting IP address, you must send a message that describe the attack. The
 The `ApiHandler::cleanMessage(string $message)` method:
 
 - removes all email addresses; 
-- removes and IPs and names defined in *whitelist* (see [Create an ApiHandler](#apihandler)).
+- removes and IPs and names defined in *whitelist* (see [Create an ApiHandler](#11-create-an-apihandler)).
 - strips message to 1024 chars.
 
 > The `cleanMessage()` method is already called when you use the `report()` method. You can use the `cleanMessage()` method when preparing a `csv` file of reports, for example.
