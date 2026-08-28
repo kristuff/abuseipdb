@@ -464,7 +464,7 @@ The `ApiHandler::report()` method accepts a single IP address (v4 or v6) as firs
 
 You must also set :
 
-- valid **report category(ies)** (`string`): comma separated list (See: [***Report categories***](#categories))
+- valid **report category(ies)** (`string`): comma separated list (See: [***Report categories***](#14-report-categories))
 - a **message** (`string`).
 
 
