@@ -215,7 +215,7 @@ ShortName        | Id    | Full name          | Can be alone?
  ssh             |   22  | SSH                |      ***false***     
  iot             |   23  | IoT Targeted       |      true
 
-See also: [How to get categories list](#categories_list).
+See also: [How to get categories list](#31-get-report-categories-list).
 
 
 ## 2. How to 
